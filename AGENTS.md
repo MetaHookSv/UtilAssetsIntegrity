@@ -1,11 +1,16 @@
 # Repository guidance
 
 This repository builds the standalone UtilAssetsIntegrity utility DLL. Read
-`memory/UtilAssetsIntegrity.md` for the module and public interface, then
+`memory/project_overview.md` for provenance and the repository map, then
+`memory/UtilAssetsIntegrity.md` for the module, its checks and the public interface, and
 `docs/build.md` for build inputs and verification. Knowledge notes use the
-`utilassetsintegrity/` permalink prefix. Read and edit them locally unless a Basic
-Memory project has been bound to this repository; the original `metahooksv` project
-belongs to the source repository.
+`utilassetsintegrity/` permalink prefix.
+
+Basic Memory is registered as MCP server `basic-memory`, pinned to the
+`utilassetsintegrity` project (project-level `.mcp.json`, mirrored by `.codex/config.toml`).
+Use its tools (`search_notes` / `read_note` / `write_note` / `edit_note`) only when the
+project resolves to this repository's `memory/` directory; otherwise read and edit the
+markdown files directly. The original `metahooksv` project belongs to the source repository.
 
 Runtime code lives in `src/`, the public interface in `include/Interface/`, CMake
 dependency setup in `cmake/`, and DLL integration tests in `tests/`.
