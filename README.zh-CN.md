@@ -45,8 +45,8 @@ scripts\build-UtilAssetsIntegrity-x86-Debug.bat
 ## CI 与发布
 
 main push、PR 和手动触发执行 x86 Release 构建测试，`v*` 标签触发发布。
-完整安装目录打包为 `UtilAssetsIntegrity-windows-x86.7z`，包含公共头文件与版权声明，
-上传前执行 `7z t` 校验。
+仅将安装目录中的 `svencoop/` 和 `include/` 打包为 `UtilAssetsIntegrity-windows-x86.7z`，
+保留这两个顶层目录，上传前执行 `7z t` 校验。
 
 ## 许可证
 

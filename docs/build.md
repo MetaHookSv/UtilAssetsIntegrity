@@ -50,8 +50,10 @@ scripts repeat the same tests with the installed DLL paths.
 
 Before delivery, build and test both configurations, check x86 headers and the
 `CreateInterface` export, compare the migrated implementation and interface with their
-source copies, then package the entire install directory and run `7z t`. Record actual
-commands and results; a CI workflow definition alone does not prove a successful run.
+source copies, then package only `svencoop/` and `include/` from the install directory
+and run `7z t`. Preserve both top-level directories and check that the archive contains
+no other paths. Record actual commands and results; a CI workflow definition alone
+does not prove a successful run.
 
 ## Provenance
 
@@ -88,3 +90,18 @@ in the migrated module or new smoke-test source.
 
 GitHub-hosted workflows and game integration were not executed locally. Changes are
 uncommitted; this verification does not record a commit, push or published release.
+
+## Packaging scope verification (2026-10-03)
+
+After limiting the archive inputs to `svencoop/` and `include/`, local verification showed:
+
+- Both x86 build scripts returned 0; CTest passed 1/1 in each configuration and both
+  installed-DLL smoke tests passed.
+- `actionlint .github/workflows/livebuild.yml .github/workflows/release.yml` returned 0;
+  the composite action and both workflow YAML files parsed successfully with PyYAML.
+- From `install/x86/Release`, `7z a -t7z <archive-path> svencoop include` and
+  `7z t <archive-path>` returned 0. `7z l -slt -ba <archive-path>` confirmed only the
+  two requested directory trees, containing the public header, module DLL/PDB and
+  FreeImage DLL (four files total).
+- `7z x` returned 0, and the Release public-interface smoke test passed against
+  the extracted DLLs. GitHub-hosted workflows were not executed locally.

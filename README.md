@@ -70,9 +70,9 @@ using the interface and do not delete the instance.
 ## Builds and releases
 
 GitHub Actions builds and tests x86 Release for main pushes, pull requests and manual
-runs. Tags matching `v*` create a release. The complete installed directory is packaged
-as `UtilAssetsIntegrity-windows-x86.7z`, including the public header and license notices,
-and verified with `7z t`.
+runs. Tags matching `v*` create a release. Only `svencoop/` and `include/` from the
+installed directory are packaged as `UtilAssetsIntegrity-windows-x86.7z`, preserving
+both top-level directories, and verified with `7z t`.
 
 ## License
 
