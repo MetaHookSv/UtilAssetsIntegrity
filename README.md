@@ -65,7 +65,7 @@ using the interface and do not delete the instance.
   pointer skips the size limits.
 - A failed check returns a `UtilAssetsIntegrityCheckReason` and fills `ReasonStr`
   when a result object is supplied. The migration retains the original checks;
-  see [the module note](memory/UtilAssetsIntegrity.md) for their boundaries.
+  see [the project overview](memory/project_overview.md) for their boundaries.
 
 ## Builds and releases
 

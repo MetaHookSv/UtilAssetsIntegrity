@@ -20,12 +20,12 @@ the public contract and runtime integration rather than proving complete malform
 
 This repository is the standalone UtilAssetsIntegrity library, extracted from MetaHookSv
 (`PluginLibs/UtilAssetsIntegrity/`) into its own CMake workspace, aligned with the standalone
-Renderer, PrecacheManager and HeapPatch projects. The migrated module note
-(`memory/UtilAssetsIntegrity.md`, adapted from MetaHookSv `memory/UtilAssetsIntegrity.md`, which was
-itself a source-level analysis) has been merged into this note, which is now the single knowledge
-entry point for the repository: its architecture, public contract, validation boundaries and
-verification content all live here, after being checked against the current `src/` and
-`include/Interface/`.
+Renderer, PrecacheManager and HeapPatch projects. The standalone module note this repository used to
+carry (`memory/UtilAssetsIntegrity.md`, itself adapted from MetaHookSv
+`memory/UtilAssetsIntegrity.md`, a source-level analysis) has been merged into this note and removed;
+this is now the single knowledge entry point for the repository, and its architecture, public
+contract, validation boundaries and verification content all live here, after being checked against
+the current `src/` and `include/Interface/`.
 
 The implementation files, the public header and the MIT license are byte-for-byte identical to the
 original MetaHookSv copies; the only change is the build system (CMake instead of MSBuild). The

@@ -60,7 +60,6 @@ install(FILES "$<TARGET_FILE:FreeImage>" DESTINATION svencoop/metahook/dlls/Free
 install(FILES include/Interface/IUtilAssetsIntegrity.h DESTINATION include/Interface)
 install(FILES README.md README.zh-CN.md LICENSE THIRD-PARTY-NOTICES.md DESTINATION .)
 install(FILES docs/build.md DESTINATION docs)
-install(FILES memory/UtilAssetsIntegrity.md DESTINATION memory)
 install(FILES "${SCOPEEXIT_SOURCE_PATH}/LICENSE" DESTINATION licenses/ScopeExit)
 install(FILES "${METAHOOK_SOURCE_PATH}/LICENSE" DESTINATION licenses/MetaHook)
 install(FILES "${METAHOOK_SOURCE_PATH}/include/HLSDK/common/interface.h"

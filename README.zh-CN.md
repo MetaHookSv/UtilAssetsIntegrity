@@ -40,7 +40,7 @@ scripts\build-UtilAssetsIntegrity-x86-Debug.bat
 - `MaxSize` 指解码后的像素数量，三项限制默认为零，检查非空图像前需要设置；
   传入空结果指针时跳过尺寸限制。
 - 失败通过 `UtilAssetsIntegrityCheckReason` 和结果对象的 `ReasonStr` 返回。
-  校验边界见[模块笔记](memory/UtilAssetsIntegrity.md)。
+  校验边界见[工程概览](memory/project_overview.md)。
 
 ## CI 与发布
 

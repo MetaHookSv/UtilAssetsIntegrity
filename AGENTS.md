@@ -1,8 +1,8 @@
 # Repository guidance
 
 This repository builds the standalone UtilAssetsIntegrity utility DLL. Read
-`memory/project_overview.md` for provenance and the repository map, then
-`memory/UtilAssetsIntegrity.md` for the module, its checks and the public interface, and
+`memory/project_overview.md` — the single knowledge entry point: provenance, the repository
+map, the module, its validation boundaries and the public interface — then
 `docs/build.md` for build inputs and verification. Knowledge notes use the
 `utilassetsintegrity/` permalink prefix.
 
