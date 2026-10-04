@@ -30,8 +30,9 @@ scripts\build-UtilAssetsIntegrity-x86-Debug.bat
 子目录，Release 使用 `FreeImage.dll`，Debug 使用 `FreeImaged.dll`。
 加载前，宿主需要将 FreeImage 目录加入 DLL 搜索范围，或先加载对应的运行库。
 
-公共头文件安装到 `include/Interface/IUtilAssetsIntegrity.h`，调用方还需 MetaHook SDK 的
-`interface.h`。从 DLL 的 `CreateInterface` 请求 `UTIL_ASSETS_INTEGRITY_INTERFACE_VERSION`。
+公共头文件位于仓库的 `include/Interface/IUtilAssetsIntegrity.h`（不随发布压缩包分发），
+调用方还需 MetaHook SDK 的 `interface.h`。从 DLL 的 `CreateInterface` 请求
+`UTIL_ASSETS_INTEGRITY_INTERFACE_VERSION`。
 返回对象由 DLL 持有，使用期间保持 DLL 已加载，不要删除该对象。
 
 - `CheckStudioModel` 检查原有 IDST/IDSQ、版本 10 的模型格式。
@@ -45,8 +46,8 @@ scripts\build-UtilAssetsIntegrity-x86-Debug.bat
 ## CI 与发布
 
 main push、PR 和手动触发执行 x86 Release 构建测试，`v*` 标签触发发布。
-仅将安装目录中的 `svencoop/` 和 `include/` 打包为 `UtilAssetsIntegrity-windows-x86.7z`，
-保留这两个顶层目录，上传前执行 `7z t` 校验。
+仅将安装目录中的运行时 `svencoop/` 目录打包为 `UtilAssetsIntegrity-windows-x86.7z`，
+保留该顶层目录，上传前执行 `7z t` 校验。
 
 ## 许可证
 

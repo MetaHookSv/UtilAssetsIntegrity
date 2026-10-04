@@ -141,6 +141,8 @@ deliberately, and each was confirmed in the current source:
 - **Public contract**: `include/Interface/IUtilAssetsIntegrity.h` plus the MetaHook SDK's
   `interface.h` for `IBaseInterface` / `CreateInterface`; the SDK's
   `include/HLSDK/common/interface.cpp` is compiled into this DLL (the launcher is never built here).
+  The public header ships with the repository sources; it is not copied into the install tree or
+  the release archive.
 - **HLSDK / GoldSrc structures**: `studio.h` (`studiohdr_t`, `mstudiomesh_t`, and the rest of the
   model layout) and `engine/studio.h`.
 - **FreeImage**: the BMP decoder, a shared library linked as the CMake target `FreeImage` built in a
@@ -159,14 +161,17 @@ Runtime install layout (nothing is deployed into a game automatically):
 ```text
 svencoop/metahook/dlls/UtilAssetsIntegrity.dll    (+ .pdb)
 svencoop/metahook/dlls/FreeImage/FreeImage.dll    (FreeImaged.dll for Debug)
-include/Interface/IUtilAssetsIntegrity.h          (consumers also need the SDK's interface.h)
-licenses/                                         (ScopeExit, MetaHook, HLSDK, VC-LTL, FreeImage)
 ```
+
+The install tree and release archive carry only this runtime `svencoop/` tree. The public header
+lives in the repository's `include/Interface/`, and licenses stay in the repository's
+`THIRD-PARTY-NOTICES.md` and `licenses/`; neither is installed or packaged. Consumers of
+`IUtilAssetsIntegrity.h` also need the SDK's `interface.h`.
 
 ## Repository layout
 
 - `src/UtilAssetsIntegrity.cpp`, `src/dllmain.cpp` — implementation and DLL entry point.
-- `include/Interface/IUtilAssetsIntegrity.h` — public header (installed for consumers).
+- `include/Interface/IUtilAssetsIntegrity.h` — public header (shipped with the sources, not installed).
 - `tests/SmokeTests.cpp` — factory, singleton and validation smoke tests (CTest).
 - `CMakeLists.txt`, `cmake/Dependencies.cmake`, `cmake/VCLTL.cmake` — build and dependency pinning.
 - `scripts/build-UtilAssetsIntegrity-x86-{Debug,Release}.bat` — configure/build/test/install entry
@@ -187,7 +192,7 @@ exercises the shipping artifact: factory versioning, singleton behavior, model f
 failures, BMP decoding, indexed-color rejection, the limits and the optional-result-pointer path.
 Before release the delivery gates are: build and test both configurations, check the x86 headers and
 the `CreateInterface` export, compare the implementation/interface with the source copies, then
-package only `svencoop/` and `include/` from the install directory and verify the archive with `7z t`.
+package only the runtime `svencoop/` tree from the install directory and verify the archive with `7z t`.
 GitHub Actions builds and tests x86 Release for main pushes, pull requests and manual runs; `v*` tags
 create a release archive.
 

@@ -44,15 +44,14 @@ The installed layout is:
 svencoop/metahook/dlls/UtilAssetsIntegrity.dll
 svencoop/metahook/dlls/UtilAssetsIntegrity.pdb
 svencoop/metahook/dlls/FreeImage/FreeImage.dll   (FreeImaged.dll for Debug)
-include/Interface/IUtilAssetsIntegrity.h
-licenses/
 ```
 
 Copy the installed `svencoop` directory over the game's mod directory. The host must
 make the FreeImage directory available to the Windows DLL loader before loading
 `UtilAssetsIntegrity.dll`, as MetaHook's dependency search setup does.
 
-Consumers include `IUtilAssetsIntegrity.h` plus the MetaHook SDK's `interface.h`, load
+Consumers include the repository's `include/Interface/IUtilAssetsIntegrity.h` (headers are
+not shipped in the release archive) plus the MetaHook SDK's `interface.h`, load
 the DLL and request `UTIL_ASSETS_INTEGRITY_INTERFACE_VERSION` from its `CreateInterface`
 factory. The returned instance is a singleton owned by the DLL. Keep it loaded while
 using the interface and do not delete the instance.
@@ -70,9 +69,9 @@ using the interface and do not delete the instance.
 ## Builds and releases
 
 GitHub Actions builds and tests x86 Release for main pushes, pull requests and manual
-runs. Tags matching `v*` create a release. Only `svencoop/` and `include/` from the
-installed directory are packaged as `UtilAssetsIntegrity-windows-x86.7z`, preserving
-both top-level directories, and verified with `7z t`.
+runs. Tags matching `v*` create a release. Only the runtime `svencoop/` tree from the
+installed directory is packaged as `UtilAssetsIntegrity-windows-x86.7z`, preserving its
+top-level directory, and verified with `7z t`.
 
 ## License
 

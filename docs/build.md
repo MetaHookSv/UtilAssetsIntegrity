@@ -50,8 +50,8 @@ scripts repeat the same tests with the installed DLL paths.
 
 Before delivery, build and test both configurations, check x86 headers and the
 `CreateInterface` export, compare the migrated implementation and interface with their
-source copies, then package only `svencoop/` and `include/` from the install directory
-and run `7z t`. Preserve both top-level directories and check that the archive contains
+source copies, then package only the runtime `svencoop/` tree from the install directory
+and run `7z t`. Preserve that top-level directory and check that the archive contains
 no other paths. Record actual commands and results; a CI workflow definition alone
 does not prove a successful run.
 
@@ -105,3 +105,15 @@ After limiting the archive inputs to `svencoop/` and `include/`, local verificat
   FreeImage DLL (four files total).
 - `7z x` returned 0, and the Release public-interface smoke test passed against
   the extracted DLLs. GitHub-hosted workflows were not executed locally.
+
+## Archive contents narrowed to the runtime tree (2026-10-04)
+
+The `CMakeLists.txt` install rules for the public header, READMEs, licenses and
+`docs/build.md` were removed, so the install tree now contains only the runtime
+`svencoop/` tree. The packaging step was still requesting `include/`, which made `7z`
+report a scan warning and fail with exit code 1 in CI. The composite action now packages
+only `svencoop/`.
+
+Local verification reproduced the packaging step against a stub install tree: from
+`install/x86/Release`, `7z a -t7z <archive-path> svencoop` and `7z t <archive-path>`
+returned 0 with no scan warnings. GitHub-hosted workflows were not executed locally.
