@@ -60,28 +60,6 @@ set_target_properties(UtilAssetsIntegrity PROPERTIES INTERPROCEDURAL_OPTIMIZATIO
 install(TARGETS UtilAssetsIntegrity RUNTIME DESTINATION svencoop/metahook/dlls)
 install(FILES "$<TARGET_PDB_FILE:UtilAssetsIntegrity>" DESTINATION svencoop/metahook/dlls)
 install(FILES "$<TARGET_FILE:FreeImage>" DESTINATION svencoop/metahook/dlls/FreeImage)
-install(FILES include/Interface/IUtilAssetsIntegrity.h DESTINATION include/Interface)
-install(FILES README.md README.zh-CN.md LICENSE THIRD-PARTY-NOTICES.md DESTINATION .)
-install(FILES docs/build.md DESTINATION docs)
-install(FILES "${SCOPEEXIT_SOURCE_PATH}/LICENSE" DESTINATION licenses/ScopeExit)
-install(FILES "${METAHOOK_SOURCE_PATH}/LICENSE" DESTINATION licenses/MetaHook)
-install(FILES "${METAHOOK_SOURCE_PATH}/include/HLSDK/common/interface.h"
-    "${METAHOOK_SOURCE_PATH}/include/HLSDK/engine/studio.h" DESTINATION licenses/HLSDK)
-install(FILES licenses/VC-LTL/LICENSE DESTINATION licenses/VC-LTL)
-install(FILES "${VC_LTL_Root}/Readme.md" DESTINATION licenses/VC-LTL OPTIONAL)
-install(FILES "${FREEIMAGE_SOURCE_PATH}/license-fi.txt"
-    "${FREEIMAGE_SOURCE_PATH}/license-gplv2.txt" "${FREEIMAGE_SOURCE_PATH}/license-gplv3.txt"
-    DESTINATION licenses/FreeImage)
-# Some codecs, including JPEG and zlib, put license notices in their README.
-file(GLOB_RECURSE freeimage_notices RELATIVE "${FREEIMAGE_SOURCE_PATH}/Source"
-    "${FREEIMAGE_SOURCE_PATH}/Source/*LICENSE*" "${FREEIMAGE_SOURCE_PATH}/Source/*license*"
-    "${FREEIMAGE_SOURCE_PATH}/Source/*COPYING*" "${FREEIMAGE_SOURCE_PATH}/Source/*copyright*"
-    "${FREEIMAGE_SOURCE_PATH}/Source/*README*")
-foreach(notice IN LISTS freeimage_notices)
-    get_filename_component(notice_directory "${notice}" DIRECTORY)
-    install(FILES "${FREEIMAGE_SOURCE_PATH}/Source/${notice}"
-        DESTINATION "licenses/FreeImage/Source/${notice_directory}")
-endforeach()
 
 include(CTest)
 if(BUILD_TESTING)
