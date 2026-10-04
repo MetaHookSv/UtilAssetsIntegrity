@@ -20,7 +20,10 @@ include("${VC_LTL_Root}/VC-LTL helper for cmake.cmake")
 # FreeImage inherits the parent's VC-LTL settings. Its own install rules are
 # excluded; this project installs only its runtime and license notices.
 set(USE_VCLTL OFF CACHE BOOL "Separate vendor VC-LTL integration" FORCE)
-add_subdirectory("${FREEIMAGE_SOURCE_PATH}" "${CMAKE_CURRENT_BINARY_DIR}/thirdparty/FreeImage" EXCLUDE_FROM_ALL)
+# An aggregating parent build may already provide FreeImage from a sibling component.
+if(NOT TARGET FreeImage)
+    add_subdirectory("${FREEIMAGE_SOURCE_PATH}" "${CMAKE_CURRENT_BINARY_DIR}/thirdparty/FreeImage" EXCLUDE_FROM_ALL)
+endif()
 if(NOT TARGET FreeImage)
     message(FATAL_ERROR "FREEIMAGE_SOURCE_PATH must provide the FreeImage CMake target.")
 endif()
