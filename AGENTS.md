@@ -6,12 +6,6 @@ map, the module, its validation boundaries and the public interface — then
 `docs/build.md` for build inputs and verification. Knowledge notes use the
 `utilassetsintegrity/` permalink prefix.
 
-Basic Memory is registered as MCP server `basic-memory`, pinned to the
-`utilassetsintegrity` project (project-level `.mcp.json`, mirrored by `.codex/config.toml`).
-Use its tools (`search_notes` / `read_note` / `write_note` / `edit_note`) only when the
-project resolves to this repository's `memory/` directory; otherwise read and edit the
-markdown files directly. The original `metahooksv` project belongs to the source repository.
-
 Runtime code lives in `src/`, the public interface in `include/Interface/`, CMake
 dependency setup in `cmake/`, and DLL integration tests in `tests/`.
 
