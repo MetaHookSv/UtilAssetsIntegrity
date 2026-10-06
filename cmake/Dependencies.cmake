@@ -54,7 +54,7 @@ function(utilassetsintegrity_prepare_dependencies)
     if(NOT FREEIMAGE_SOURCE_PATH)
         utilassetsintegrity_fetch_source(utilassetsintegrity_freeimage
             https://github.com/hzqst/FreeImage_clone
-            c68700b9fe699dbbf99f88a611065f101cba1a41 FREEIMAGE_SOURCE_PATH)
+            007c9e4c5d4198a1646b6c5274fd855be9cca7ef FREEIMAGE_SOURCE_PATH)
     endif()
     if(NOT SCOPEEXIT_SOURCE_PATH)
         utilassetsintegrity_fetch_source(utilassetsintegrity_scopeexit
