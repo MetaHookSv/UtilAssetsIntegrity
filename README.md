@@ -1,7 +1,7 @@
 # UtilAssetsIntegrity
 
 A Windows x86 utility DLL for checking GoldSrc StudioModel assets and indexed-color BMP images.
-Originally part of [MetaHookSv](https://github.com/hzqst/MetaHookSv/tree/main/PluginLibs/UtilAssetsIntegrity).
+Originally part of [MetaHookSv](https://github.com/MetaHookSv/MetaHookSv/tree/main/PluginLibs/UtilAssetsIntegrity).
 
 The migration preserves the existing validation behavior and the
 `CreateInterface("UtilAssetsIntegrityAPI_001", ...)` interface. See

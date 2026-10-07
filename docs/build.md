@@ -58,7 +58,7 @@ does not prove a successful run.
 ## Provenance
 
 The initial module sources, DLL entry point, public interface and MIT license are
-copied unchanged from `hzqst/MetaHookSv`. The original MSBuild project is replaced by
+copied unchanged from `MetaHookSv/MetaHookSv`. The original MSBuild project is replaced by
 CMake. The standalone runtime layout retains the original `metahook/dlls` and
 `metahook/dlls/FreeImage` placement. This library does not use engine gamedata or
 require a plugin load-list entry.

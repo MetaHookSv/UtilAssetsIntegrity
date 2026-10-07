@@ -1,7 +1,7 @@
 # UtilAssetsIntegrity
 
 用于检查 GoldSrc StudioModel 和索引色 BMP 图像的 Windows x86 工具 DLL。
-源码来自 [MetaHookSv](https://github.com/hzqst/MetaHookSv/tree/main/PluginLibs/UtilAssetsIntegrity)，
+源码来自 [MetaHookSv](https://github.com/MetaHookSv/MetaHookSv/tree/main/PluginLibs/UtilAssetsIntegrity)，
 保持原有校验行为及 `CreateInterface("UtilAssetsIntegrityAPI_001", ...)` 接口兼容。
 
 ## 构建与测试
