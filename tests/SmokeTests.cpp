@@ -37,8 +37,7 @@ void Expect(UtilAssetsIntegrityCheckReason expected, UtilAssetsIntegrityCheckRea
 class Module
 {
 public:
-    explicit Module(const std::filesystem::path& path)
-        : handle(LoadLibraryExW(std::filesystem::absolute(path).c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH))
+    explicit Module(const std::filesystem::path& path) : handle(LoadLibraryExW(std::filesystem::absolute(path).c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH))
     {
         if (!handle)
         {
@@ -47,7 +46,7 @@ public:
     }
 
     ~Module() { FreeLibrary(handle); }
-    Module(const Module&) = delete;
+    Module(const Module&)            = delete;
     Module& operator=(const Module&) = delete;
 
     HMODULE handle;
@@ -56,10 +55,10 @@ public:
 studiohdr_t MakeStudioHeader(const char* magic = "IDST")
 {
     constexpr int studioVersion = 10;
-    studiohdr_t header{};
+    studiohdr_t   header{};
     std::memcpy(&header.id, magic, sizeof(header.id));
     header.version = studioVersion;
-    header.length = sizeof(header);
+    header.length  = sizeof(header);
     return header;
 }
 
@@ -67,7 +66,7 @@ void CheckStudioModels(IUtilAssetsIntegrity& api)
 {
     using Reason = UtilAssetsIntegrityCheckReason;
     UtilAssetsIntegrityCheckResult_StudioModel result;
-    auto header = MakeStudioHeader();
+    auto                                       header = MakeStudioHeader();
     Expect(Reason::OK, api.CheckStudioModel(&header, sizeof(header), &result), "IDST header");
     Expect(Reason::OK, api.CheckStudioModel(&header, sizeof(header), nullptr), "IDST without result");
 
@@ -87,9 +86,9 @@ void CheckStudioModels(IUtilAssetsIntegrity& api)
     ++header.length;
     Expect(Reason::OutOfBound, api.CheckStudioModel(&header, sizeof(header), &result), "IDST file length");
 
-    header = MakeStudioHeader();
-    header.numtextures = 1;
-    header.textureindex = sizeof(header) + 1;
+    header                  = MakeStudioHeader();
+    header.numtextures      = 1;
+    header.textureindex     = sizeof(header) + 1;
     header.texturedataindex = sizeof(header);
     Expect(Reason::OutOfBound, api.CheckStudioModel(&header, sizeof(header), &result), "IDST texture table offset");
 
@@ -99,32 +98,32 @@ void CheckStudioModels(IUtilAssetsIntegrity& api)
     Expect(Reason::VersionMismatch, api.CheckStudioModel(&header, sizeof(header), &result), "IDSQ version");
 }
 
-constexpr DWORD bmpWidth = 2;
-constexpr DWORD bmpHeight = 2;
-constexpr WORD indexedBits = 8;
-constexpr WORD rgbBits = 24;
+constexpr DWORD bmpWidth    = 2;
+constexpr DWORD bmpHeight   = 2;
+constexpr WORD  indexedBits = 8;
+constexpr WORD  rgbBits     = 24;
 
 std::vector<std::uint8_t> MakeBmp(WORD bits)
 {
-    constexpr WORD bmpSignature = 0x4d42;
-    constexpr DWORD paletteEntries = 256;
-    constexpr DWORD rowAlignmentBits = 32;
-    constexpr DWORD rowAlignmentBytes = 4;
-    const DWORD paletteSize = bits == indexedBits ? paletteEntries * sizeof(RGBQUAD) : 0;
-    const DWORD rowSize = ((bmpWidth * bits + rowAlignmentBits - 1) / rowAlignmentBits) * rowAlignmentBytes;
+    constexpr WORD   bmpSignature      = 0x4d42;
+    constexpr DWORD  paletteEntries    = 256;
+    constexpr DWORD  rowAlignmentBits  = 32;
+    constexpr DWORD  rowAlignmentBytes = 4;
+    const DWORD      paletteSize       = bits == indexedBits ? paletteEntries * sizeof(RGBQUAD) : 0;
+    const DWORD      rowSize           = ((bmpWidth * bits + rowAlignmentBits - 1) / rowAlignmentBits) * rowAlignmentBytes;
     BITMAPFILEHEADER fileHeader{};
-    fileHeader.bfType = bmpSignature;
+    fileHeader.bfType    = bmpSignature;
     fileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + paletteSize;
-    fileHeader.bfSize = fileHeader.bfOffBits + rowSize * bmpHeight;
+    fileHeader.bfSize    = fileHeader.bfOffBits + rowSize * bmpHeight;
     BITMAPINFOHEADER infoHeader{};
-    infoHeader.biSize = sizeof(infoHeader);
-    infoHeader.biWidth = bmpWidth;
-    infoHeader.biHeight = bmpHeight;
-    infoHeader.biPlanes = 1;
-    infoHeader.biBitCount = bits;
+    infoHeader.biSize        = sizeof(infoHeader);
+    infoHeader.biWidth       = bmpWidth;
+    infoHeader.biHeight      = bmpHeight;
+    infoHeader.biPlanes      = 1;
+    infoHeader.biBitCount    = bits;
     infoHeader.biCompression = BI_RGB;
-    infoHeader.biSizeImage = rowSize * bmpHeight;
-    infoHeader.biClrUsed = bits == indexedBits ? paletteEntries : 0;
+    infoHeader.biSizeImage   = rowSize * bmpHeight;
+    infoHeader.biClrUsed     = bits == indexedBits ? paletteEntries : 0;
 
     std::vector<std::uint8_t> image(fileHeader.bfSize);
     std::memcpy(image.data(), &fileHeader, sizeof(fileHeader));
@@ -143,12 +142,12 @@ std::vector<std::uint8_t> MakeBmp(WORD bits)
 
 void CheckBmps(IUtilAssetsIntegrity& api)
 {
-    using Reason = UtilAssetsIntegrityCheckReason;
-    const auto image = MakeBmp(indexedBits);
+    using Reason                             = UtilAssetsIntegrityCheckReason;
+    const auto                         image = MakeBmp(indexedBits);
     UtilAssetsIntegrityCheckResult_BMP result;
-    result.MaxWidth = bmpWidth;
+    result.MaxWidth  = bmpWidth;
     result.MaxHeight = bmpHeight;
-    result.MaxSize = bmpWidth * bmpHeight;
+    result.MaxSize   = bmpWidth * bmpHeight;
     Expect(Reason::OK, api.Check8bitBMP(image.data(), image.size(), &result), "indexed BMP at limits");
     Expect(Reason::OK, api.Check8bitBMP(image.data(), image.size(), nullptr), "indexed BMP without limits");
 
@@ -168,7 +167,7 @@ void CheckBmps(IUtilAssetsIntegrity& api)
     Expect(Reason::InvalidFormat, api.Check8bitBMP(rgb.data(), rgb.size(), nullptr), "RGB BMP");
     Expect(Reason::BogusHeader, api.Check8bitBMP(image.data(), sizeof(BITMAPFILEHEADER), &result), "truncated BMP");
 }
-}
+} // namespace
 
 int wmain(int argc, wchar_t** argv)
 {
@@ -183,12 +182,12 @@ int wmain(int argc, wchar_t** argv)
         // The host likewise makes its dependency directories available before loading plugins.
         Module freeimage(argv[2]);
         Module library(argv[1]);
-        auto factory = reinterpret_cast<CreateInterfaceFn>(GetProcAddress(library.handle, CREATEINTERFACE_PROCNAME));
+        auto   factory = reinterpret_cast<CreateInterfaceFn>(GetProcAddress(library.handle, CREATEINTERFACE_PROCNAME));
         if (!factory)
             throw std::runtime_error("CreateInterface export is missing");
 
-        int returnCode = IFACE_FAILED;
-        auto api = static_cast<IUtilAssetsIntegrity*>(factory(UTIL_ASSETS_INTEGRITY_INTERFACE_VERSION, &returnCode));
+        int  returnCode = IFACE_FAILED;
+        auto api        = static_cast<IUtilAssetsIntegrity*>(factory(UTIL_ASSETS_INTEGRITY_INTERFACE_VERSION, &returnCode));
         if (!api)
             throw std::runtime_error("UtilAssetsIntegrityAPI_001 is unavailable");
         Check(returnCode == IFACE_OK, "interface success code");
