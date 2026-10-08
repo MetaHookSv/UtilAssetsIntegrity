@@ -22,6 +22,7 @@ public:
     {
         ReasonStr[0] = 0;
     }
+
 public:
     char ReasonStr[256];
 };
@@ -29,7 +30,6 @@ public:
 class UtilAssetsIntegrityCheckResult_StudioModel : public UtilAssetsIntegrityCheckResult
 {
 public:
-    
 };
 
 class UtilAssetsIntegrityCheckResult_BMP : public UtilAssetsIntegrityCheckResult
@@ -37,13 +37,12 @@ class UtilAssetsIntegrityCheckResult_BMP : public UtilAssetsIntegrityCheckResult
 public:
     UtilAssetsIntegrityCheckResult_BMP() : UtilAssetsIntegrityCheckResult()
     {
-        MaxWidth = 0;
+        MaxWidth  = 0;
         MaxHeight = 0;
-        MaxSize = 0;
+        MaxSize   = 0;
     }
+
 public:
-
-
     size_t MaxWidth;
     size_t MaxHeight;
     size_t MaxSize;
@@ -52,8 +51,8 @@ public:
 class IUtilAssetsIntegrity : public IBaseInterface
 {
 public:
-    virtual UtilAssetsIntegrityCheckReason CheckStudioModel(const void *buf, size_t bufSize, UtilAssetsIntegrityCheckResult_StudioModel *checkResult) = 0;
-    virtual UtilAssetsIntegrityCheckReason Check8bitBMP(const void* buf, size_t bufSize, UtilAssetsIntegrityCheckResult_BMP* checkResult) = 0;
+    virtual UtilAssetsIntegrityCheckReason CheckStudioModel(const void* buf, size_t bufSize, UtilAssetsIntegrityCheckResult_StudioModel* checkResult) = 0;
+    virtual UtilAssetsIntegrityCheckReason Check8bitBMP(const void* buf, size_t bufSize, UtilAssetsIntegrityCheckResult_BMP* checkResult)             = 0;
 };
 
 IUtilAssetsIntegrity* UtilAssetsIntegrity();
