@@ -50,9 +50,11 @@ target_compile_definitions(utilassetsintegrity_settings INTERFACE
     $<$<CONFIG:Debug>:_DEBUG> $<$<CONFIG:Release>:NDEBUG>)
 target_compile_options(utilassetsintegrity_settings INTERFACE /W3 /permissive- /wd4819 /Zi)
 
+include(cmake/SourceGroups.cmake)
 add_library(UtilAssetsIntegrity SHARED
     src/UtilAssetsIntegrity.cpp src/dllmain.cpp
     "${METAHOOK_SOURCE_PATH}/include/HLSDK/common/interface.cpp")
+utilassetsintegrity_assign_source_groups(UtilAssetsIntegrity)
 target_link_libraries(UtilAssetsIntegrity PRIVATE utilassetsintegrity_settings FreeImage)
 target_include_directories(UtilAssetsIntegrity PRIVATE "${SCOPEEXIT_SOURCE_PATH}/include")
 target_compile_definitions(UtilAssetsIntegrity PRIVATE UTILASSETSINTEGRITY_EXPORTS _USRDLL)
