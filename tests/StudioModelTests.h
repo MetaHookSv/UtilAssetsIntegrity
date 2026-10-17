@@ -114,22 +114,36 @@ void CheckStudioRegressions(IUtilAssetsIntegrity& api)
         file.Finish();
         Expect(Reason::OK, api.CheckStudioModel(file.bytes.data(), file.bytes.size(), nullptr), "Counter-Strike nine-way blends");
     }
+    for (const bool bTextureOnly : {false, true})
     {
-        auto                             file = valid;
-        std::array<mstudiotexture_t, 33> textures{};
+        auto                                             file = valid;
+        std::array<mstudiotexture_t, MAXSTUDIOSKINS + 1> textures{};
         for (auto& texture : textures)
         {
             texture.width = texture.height = 4;
             texture.index                  = file.header.texturedataindex + sizeof(textures);
         }
         file.header.textureindex = file.AppendStructure(textures);
-        file.header.numtextures  = 32;
-        file.Write(file.header.skinindex, std::int16_t{31});
-        file.Finish();
-        Expect(Reason::OK, api.CheckStudioModel(file.bytes.data(), file.bytes.size(), nullptr), "32 textures and index 31");
-        file.header.numtextures = 33;
-        file.Finish();
-        Check(api.CheckStudioModel(file.bytes.data(), file.bytes.size(), nullptr) != Reason::OK, "33 complete texture records rejected");
+        if (bTextureOnly)
+        {
+            file.header.numbones = file.header.boneindex = 0;
+            file.header.numseq = file.header.seqindex = 0;
+            file.header.numseqgroups = file.header.seqgroupindex = 0;
+            file.header.numbodyparts = file.header.bodypartindex = 0;
+        }
+        constexpr int s_RemapCacheCapacity = 32;
+        for (const int count : {s_RemapCacheCapacity, s_RemapCacheCapacity + 1, s_RemapCacheCapacity + 2, MAXSTUDIOSKINS - 1, MAXSTUDIOSKINS, MAXSTUDIOSKINS + 1})
+        {
+            file.header.numtextures = count;
+            file.Write(file.header.skinindex, static_cast<std::int16_t>(count - 1));
+            file.Finish();
+            const auto expected = count <= MAXSTUDIOSKINS ? Reason::OK : Reason::OutOfBound;
+            Expect(expected, api.CheckStudioModel(file.bytes.data(), file.bytes.size(), nullptr), "MDL and T.mdl texture limits are independent of remap cache capacity");
+            file.Write(file.header.skinindex, static_cast<std::int16_t>(count));
+            Check(api.CheckStudioModel(file.bytes.data(), file.bytes.size(), nullptr) != Reason::OK, "skin reference at texture count rejected");
+            file.Write(file.header.skinindex, std::int16_t{-1});
+            Check(api.CheckStudioModel(file.bytes.data(), file.bytes.size(), nullptr) != Reason::OK, "negative skin reference rejected");
+        }
     }
     const auto reject = [&](auto patch, const char* name) {
         auto file = valid;

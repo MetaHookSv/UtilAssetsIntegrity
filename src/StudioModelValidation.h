@@ -70,7 +70,7 @@ public:
     }
 
 private:
-    static constexpr int TextureLimit     = 32;
+    static constexpr int TextureLimit     = MAXSTUDIOSKINS;
     static constexpr int SequenceGroups   = 16;
     static constexpr int SequencesLimit   = 2048;
     static constexpr int SubmodelsLimit   = 128;

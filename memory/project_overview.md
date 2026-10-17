@@ -11,7 +11,9 @@ permalink: utilassetsintegrity/project-overview
 The Studio implementation has been replaced by bounded record decoding in
 `src/StudioModelValidation.h`; `src/UtilAssetsIntegrity.cpp` now provides the public
 singleton and BMP wrapper. See `docs/studio-validation.md` for the current guarantees,
-32-texture compatibility policy, contextual IDSQ export and regression coverage.
+texture-table bounds, contextual IDSQ export and regression coverage. The temporary
+32-texture restriction was withdrawn: `MAX_SKINS` is a remap cache capacity, while
+model validation retains `MAXSTUDIOSKINS=100` and bounds references by `numtextures`.
 API_001's vtable and result layouts are preserved. The two additional C exports provide
 import-library access and main-model-aware external animation validation.
 

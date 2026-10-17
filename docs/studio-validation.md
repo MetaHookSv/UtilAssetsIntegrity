@@ -12,8 +12,12 @@ normal bounds. Additional checks cover bodypart zero divisors, bone parent cycle
 sequence groups, all animation blends (including Counter-Strike's nine-way blends),
 all six RLE channels and interpolation lookahead, events, attachments and transitions.
 IDST/IDSQ headers use their actual sizes; null buffers and signed-offset overflow are
-rejected. The texture limit is 32, matching the target engine's remap cache; this
-deliberately rejects models with more textures, including some existing game assets.
+rejected. Texture tables retain the SDK's `MAXSTUDIOSKINS` limit (100), with full
+extent checks and skin references bounded by the actual texture count. The engine's
+32-slot remap cache is not a format limit: models with 33, 34, or 99 textures are
+not rejected merely for exceeding that cache capacity. Cache accesses need their
+own bounds checks in the caller. The earlier 32-texture restriction was incorrect
+and has been withdrawn.
 
 The optional C exports `UtilAssetsIntegrity()` and
 `UtilAssetsIntegrity_CheckStudioSequenceGroup()` support import-library consumers.
