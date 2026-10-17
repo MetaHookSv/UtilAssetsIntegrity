@@ -2,7 +2,8 @@
 
 用于检查 GoldSrc StudioModel 和索引色 BMP 图像的 Windows x86 工具 DLL。
 源码来自 [MetaHookSv](https://github.com/MetaHookSv/MetaHookSv/tree/main/PluginLibs/UtilAssetsIntegrity)，
-保持原有校验行为及 `CreateInterface("UtilAssetsIntegrityAPI_001", ...)` 接口兼容。
+保留 `CreateInterface("UtilAssetsIntegrityAPI_001", ...)` 的 vtable 和结果布局；
+Studio 校验已修正边界错误并补充结构与动画检查，详见[校验更新](docs/studio-validation.md)。
 
 ## 构建与测试
 

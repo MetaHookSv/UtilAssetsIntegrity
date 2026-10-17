@@ -1,13 +1,18 @@
 #include <cstddef>
+#include <array>
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-#include <metahook.h>
+#include <Windows.h>
+typedef unsigned char byte;
+typedef float         vec3_t[3];
+typedef std::int32_t  int32;
 #include <studio.h>
 #include <IUtilAssetsIntegrity.h>
 
@@ -167,13 +172,15 @@ void CheckBmps(IUtilAssetsIntegrity& api)
     Expect(Reason::InvalidFormat, api.Check8bitBMP(rgb.data(), rgb.size(), nullptr), "RGB BMP");
     Expect(Reason::BogusHeader, api.Check8bitBMP(image.data(), sizeof(BITMAPFILEHEADER), &result), "truncated BMP");
 }
+#include "StudioModelTests.h"
 } // namespace
 
 int wmain(int argc, wchar_t** argv)
 {
-    if (argc != 3)
+    SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+    if (argc != 3 && argc != 4)
     {
-        std::cerr << "Usage: UtilAssetsIntegritySmokeTests <UtilAssetsIntegrity.dll> <FreeImage DLL>\n";
+        std::cerr << "Usage: UtilAssetsIntegritySmokeTests <UtilAssetsIntegrity.dll> <FreeImage DLL> [model directory]\n";
         return 2;
     }
     try
@@ -192,13 +199,35 @@ int wmain(int argc, wchar_t** argv)
             throw std::runtime_error("UtilAssetsIntegrityAPI_001 is unavailable");
         Check(returnCode == IFACE_OK, "interface success code");
         Check(api == factory(UTIL_ASSETS_INTEGRITY_INTERFACE_VERSION, nullptr), "singleton factory");
+        const auto accessor = reinterpret_cast<decltype(&UtilAssetsIntegrity)>(GetProcAddress(library.handle, "UtilAssetsIntegrity"));
+        Check(accessor && accessor() == api, "import-library accessor shares factory singleton");
         returnCode = IFACE_OK;
         Check(factory("UtilAssetsIntegrityAPI_999", &returnCode) == nullptr, "unknown interface version");
         Check(returnCode == IFACE_FAILED, "unknown interface failure code");
         CheckStudioModels(*api);
+        CheckStudioRegressions(*api);
+        CheckSequenceGroups(library.handle, *api);
         CheckBmps(*api);
         if (failures != 0)
             return 1;
+        if (argc == 4)
+        {
+            size_t checked = 0, rejected = 0;
+            for (const auto& entry : std::filesystem::recursive_directory_iterator(argv[3]))
+            {
+                if (!entry.is_regular_file() || entry.path().extension() != L".mdl") continue;
+                std::ifstream                              input(entry.path(), std::ios::binary);
+                const std::vector<char>                    bytes((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+                UtilAssetsIntegrityCheckResult_StudioModel result;
+                ++checked;
+                if (api->CheckStudioModel(bytes.data(), bytes.size(), &result) != UtilAssetsIntegrityCheckReason::OK)
+                {
+                    ++rejected;
+                    std::cout << entry.path().string() << ": " << result.ReasonStr << '\n';
+                }
+            }
+            std::cout << "Scanned " << checked << " MDL files; rejected " << rejected << ".\n";
+        }
         std::cout << "Public interface, StudioModel and BMP smoke tests passed.\n";
         return 0;
     }

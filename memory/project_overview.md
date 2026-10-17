@@ -6,6 +6,24 @@ permalink: utilassetsintegrity/project-overview
 
 # UtilAssetsIntegrity
 
+## Current validation update
+
+The Studio implementation has been replaced by bounded record decoding in
+`src/StudioModelValidation.h`; `src/UtilAssetsIntegrity.cpp` now provides the public
+singleton and BMP wrapper. See `docs/studio-validation.md` for the current guarantees,
+32-texture compatibility policy, contextual IDSQ export and regression coverage.
+API_001's vtable and result layouts are preserved. The two additional C exports provide
+import-library access and main-model-aware external animation validation.
+
+The remainder of this note is the **historical initial-migration snapshot**. Its
+statements about preserved buggy behavior, missing validation and byte-identical
+sources describe that snapshot, not the current implementation. In particular, a
+controller's `bone` is bounded by `numbones`; a bone's controller slot is bounded by
+`numbonecontrollers`. The old note's suggestion to bound the former by controller
+count was incorrect.
+
+## Historical initial-migration snapshot
+
 UtilAssetsIntegrity is a standalone utility DLL (`UtilAssetsIntegrity.dll`) that performs basic
 integrity and bounds validation on untrusted binary assets through the `IUtilAssetsIntegrity`
 interface, so malformed data does not cause out-of-bounds reads/writes or crashes in the upper layers
