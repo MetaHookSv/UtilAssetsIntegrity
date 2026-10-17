@@ -199,8 +199,8 @@ int wmain(int argc, wchar_t** argv)
             throw std::runtime_error("UtilAssetsIntegrityAPI_001 is unavailable");
         Check(returnCode == IFACE_OK, "interface success code");
         Check(api == factory(UTIL_ASSETS_INTEGRITY_INTERFACE_VERSION, nullptr), "singleton factory");
-        const auto accessor = reinterpret_cast<decltype(&UtilAssetsIntegrity)>(GetProcAddress(library.handle, "UtilAssetsIntegrity"));
-        Check(accessor && accessor() == api, "import-library accessor shares factory singleton");
+        //The interface is published through EXPOSE_SINGLE_INTERFACE only; no duplicate accessor export.
+        Check(GetProcAddress(library.handle, "UtilAssetsIntegrity") == nullptr, "no duplicate accessor export");
         returnCode = IFACE_OK;
         Check(factory("UtilAssetsIntegrityAPI_999", &returnCode) == nullptr, "unknown interface version");
         Check(returnCode == IFACE_FAILED, "unknown interface failure code");

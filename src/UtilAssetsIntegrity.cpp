@@ -55,16 +55,11 @@ public:
         return Reason::OK;
 #endif
     }
+
+    UtilAssetsIntegrityCheckReason CheckStudioSequenceGroup(const void* model, size_t modelBytes, int groupIndex, const void* group, size_t groupBytes, UtilAssetsIntegrityCheckResult_StudioModel* result) noexcept override
+    {
+        return CStudioModelValidation(group, groupBytes, result).CheckGroup(model, modelBytes, groupIndex);
+    }
 };
 
 EXPOSE_SINGLE_INTERFACE(CUtilAssetsIntegrity, IUtilAssetsIntegrity, UTIL_ASSETS_INTEGRITY_INTERFACE_VERSION);
-
-IUtilAssetsIntegrity* UtilAssetsIntegrity() noexcept
-{
-    return &__g_CUtilAssetsIntegrity_singleton;
-}
-
-UtilAssetsIntegrityCheckReason UtilAssetsIntegrity_CheckStudioSequenceGroup(const void* model, size_t modelBytes, int groupIndex, const void* group, size_t groupBytes, UtilAssetsIntegrityCheckResult_StudioModel* result) noexcept
-{
-    return CStudioModelValidation(group, groupBytes, result).CheckGroup(model, modelBytes, groupIndex);
-}

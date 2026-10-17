@@ -19,13 +19,14 @@ not rejected merely for exceeding that cache capacity. Cache accesses need their
 own bounds checks in the caller. The earlier 32-texture restriction was incorrect
 and has been withdrawn.
 
-The optional C exports `UtilAssetsIntegrity()` and
-`UtilAssetsIntegrity_CheckStudioSequenceGroup()` support import-library consumers.
-The latter takes the main model structural header and an IDSQ file together. A plain
-`CheckStudioModel(IDSQ)` validates only the sequence-file header because the file alone
-does not describe its sequences, bones or animation record offsets. It must not be
-treated as full animation validation. All input pointers are borrowed synchronously;
-the DLL retains none. The accessor returns the factory's DLL-owned singleton.
+The interface is published only through `EXPOSE_SINGLE_INTERFACE`, so callers resolve
+`UTIL_ASSETS_INTEGRITY_INTERFACE_VERSION` through `CreateInterface`. Main-model-aware
+sequence validation is the `CheckStudioSequenceGroup()` interface method, appended
+after the existing API_001 methods so their vtable slots stay unchanged. It takes the
+main model structural header and an IDSQ file together. A plain `CheckStudioModel(IDSQ)`
+validates only the sequence-file header because the file alone does not describe its
+sequences, bones or animation record offsets. It must not be treated as full animation
+validation. All input pointers are borrowed synchronously; the DLL retains none.
 
 `tests/StudioModelTests.h` exercises the corrected cases through the real DLL, including
 a string ending at a PAGE_NOACCESS guard page and malformed external RLE channels.

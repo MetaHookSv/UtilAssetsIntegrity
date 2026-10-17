@@ -14,8 +14,9 @@ singleton and BMP wrapper. See `docs/studio-validation.md` for the current guara
 texture-table bounds, contextual IDSQ export and regression coverage. The temporary
 32-texture restriction was withdrawn: `MAX_SKINS` is a remap cache capacity, while
 model validation retains `MAXSTUDIOSKINS=100` and bounds references by `numtextures`.
-API_001's vtable and result layouts are preserved. The two additional C exports provide
-import-library access and main-model-aware external animation validation.
+API_001's existing vtable slots and result layouts are preserved. The interface is
+published only through `EXPOSE_SINGLE_INTERFACE`; main-model-aware external animation
+validation is the `CheckStudioSequenceGroup()` method appended to that interface.
 
 The remainder of this note is the **historical initial-migration snapshot**. Its
 statements about preserved buggy behavior, missing validation and byte-identical

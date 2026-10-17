@@ -231,10 +231,12 @@ void CheckStudioRegressions(IUtilAssetsIntegrity& api)
 
 void CheckSequenceGroups(HMODULE library, IUtilAssetsIntegrity& api)
 {
-    using Reason          = UtilAssetsIntegrityCheckReason;
-    const auto checkGroup = reinterpret_cast<decltype(&UtilAssetsIntegrity_CheckStudioSequenceGroup)>(GetProcAddress(library, "UtilAssetsIntegrity_CheckStudioSequenceGroup"));
-    Check(checkGroup != nullptr, "contextual sequence group export");
-    if (!checkGroup) return;
+    using Reason = UtilAssetsIntegrityCheckReason;
+    //The contextual check is an interface method; no separate exported symbol exists.
+    Check(GetProcAddress(library, "UtilAssetsIntegrity_CheckStudioSequenceGroup") == nullptr, "no standalone sequence group export");
+    const auto checkGroup = [&api](const void* model, size_t modelBytes, int groupIndex, const void* group, size_t groupBytes, UtilAssetsIntegrityCheckResult_StudioModel* result) {
+        return api.CheckStudioSequenceGroup(model, modelBytes, groupIndex, group, groupBytes, result);
+    };
     auto model                 = StudioFixture{};
     model.header.numseqgroups  = 2;
     model.header.seqgroupindex = model.AppendStructure(std::array<mstudioseqgroup_t, 2>{});
