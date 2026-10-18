@@ -57,9 +57,8 @@ public:
         if (m_Header.length < sizeof(studiohdr_t) || static_cast<size_t>(m_Header.length) != m_Size)
             return Fail("invalid file length");
 
-        if (!Name(m_Header.name))
-            return Fail("unterminated model name");
-
+        //Header names are the source path studiomdl wrote, which may fill the field unterminated (Counter-Strike's
+        //v_knife.mdl), as the original engine accepts; only names of records must be terminated.
         if (m_Header.texturedataindex < 0)
             return Fail("negative texture data offset");
 
@@ -216,7 +215,8 @@ private:
         if (h.version != 10)
             return Fail("expected sequence group version 10", Reason::VersionMismatch);
 
-        if (h.length < sizeof(h) || static_cast<size_t>(h.length) != m_Size || !Name(h.name))
+        //The name may fill its field unterminated, like the main header's (see Check).
+        if (h.length < sizeof(h) || static_cast<size_t>(h.length) != m_Size)
             return Fail("invalid sequence group header");
 
         return Reason::OK;

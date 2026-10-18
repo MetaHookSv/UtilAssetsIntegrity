@@ -114,6 +114,13 @@ void CheckStudioRegressions(IUtilAssetsIntegrity& api)
         file.Finish();
         Expect(Reason::OK, api.CheckStudioModel(file.bytes.data(), file.bytes.size(), nullptr), "Counter-Strike nine-way blends");
     }
+    {
+        //Counter-Strike's v_knife.mdl names its source path in all 64 bytes, without a terminator.
+        auto file = valid;
+        std::memset(file.header.name, 'a', sizeof(file.header.name));
+        file.Finish();
+        Expect(Reason::OK, api.CheckStudioModel(file.bytes.data(), file.bytes.size(), nullptr), "header name filling its field");
+    }
     for (const bool bTextureOnly : {false, true})
     {
         auto                                             file = valid;
@@ -198,6 +205,8 @@ void CheckStudioRegressions(IUtilAssetsIntegrity& api)
     group.version = 10;
     group.length  = sizeof(group);
     Expect(Reason::OK, api.CheckStudioModel(&group, sizeof(group), nullptr), "actual 76-byte IDSQ header");
+    std::memset(group.name, 'a', sizeof(group.name));
+    Expect(Reason::OK, api.CheckStudioModel(&group, sizeof(group), nullptr), "IDSQ name filling its field");
     ++group.length;
     Check(api.CheckStudioModel(&group, sizeof(group), nullptr) != Reason::OK, "IDSQ declared length beyond input");
     Check(api.CheckStudioModel(nullptr, sizeof(studiohdr_t), nullptr) != Reason::OK, "null model with nonzero length");
