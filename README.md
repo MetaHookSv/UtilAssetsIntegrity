@@ -56,6 +56,10 @@ factory. The returned instance is a singleton owned by the DLL. Keep it loaded w
 using the interface and do not delete the instance.
 
 - `CheckStudioModel` accepts the existing IDST/IDSQ model formats, version 10.
+- `CheckStudioSequenceGroup` checks an IDSQ file's animation against its main model.
+  It accepts the last frame's interpolation read up to
+  `UTIL_ASSETS_INTEGRITY_SEQUENCE_GROUP_TAIL_BYTES` past the group, as stock group
+  files need; callers that animate the group keep that many zeroed bytes after it.
 - `Check8bitBMP` checks for FreeImage's indexed-color classification and applies
   `MaxWidth`, `MaxHeight` and `MaxSize` when a result object is supplied.
 - `MaxSize` is the decoded pixel count, not the input file size. All three limits

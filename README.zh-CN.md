@@ -36,6 +36,9 @@ scripts\build-UtilAssetsIntegrity-x86-Debug.bat
 返回对象由 DLL 持有，使用期间保持 DLL 已加载，不要删除该对象。
 
 - `CheckStudioModel` 检查原有 IDST/IDSQ、版本 10 的模型格式。
+- `CheckStudioSequenceGroup` 依据主模型检查 IDSQ 文件的动画数据。原版序列组文件需要
+  最后一帧的插值前瞻读取越过文件末尾，因此允许其最多越过
+  `UTIL_ASSETS_INTEGRITY_SEQUENCE_GROUP_TAIL_BYTES` 字节；对序列组做动画的调用方需在数据后保留同样多的零字节。
 - `Check8bitBMP` 使用 FreeImage 的索引色分类检查图像，传入结果对象时应用
   `MaxWidth`、`MaxHeight` 和 `MaxSize` 限制。
 - `MaxSize` 指解码后的像素数量，三项限制默认为零，检查非空图像前需要设置；

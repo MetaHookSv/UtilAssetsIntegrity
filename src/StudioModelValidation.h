@@ -26,7 +26,8 @@ public:
         m_pData(static_cast<const byte*>(pData)),
         m_Size(size),
         m_Limit(size),
-        m_pResult(pResult)
+        m_pResult(pResult),
+        m_LookaheadLimit(size)
     {
         if (m_pResult)
             m_pResult->ReasonStr[0] = 0;
@@ -70,7 +71,8 @@ public:
                 return Fail("invalid kept structure length");
             }
 
-            m_Limit = static_cast<size_t>(m_Header.texturedataindex);
+            m_Limit          = static_cast<size_t>(m_Header.texturedataindex);
+            m_LookaheadLimit = m_Limit;
         }
 
         if (!Textures() ||
@@ -92,6 +94,10 @@ public:
         auto code = CheckGroupHeader();
         if (code != Reason::OK)
             return code;
+
+        //Callers keep zeroed tail bytes after the group for the last frame's interpolation read (see the interface).
+        static_assert(UTIL_ASSETS_INTEGRITY_SEQUENCE_GROUP_TAIL_BYTES == 2 * sizeof(mstudioanimvalue_t), "Lookahead of two samples");
+        m_LookaheadLimit = m_Limit + UTIL_ASSETS_INTEGRITY_SEQUENCE_GROUP_TAIL_BYTES;
 
         if (!pModel || modelBytes < sizeof(studiohdr_t) || modelBytes > INT_MAX)
             return Fail("missing main model for sequence group");
@@ -442,7 +448,7 @@ private:
                         return Bad("animation samples outside file");
 
                     if (covered + span.num.total <= seq.numframes &&
-                        !Range(offset, size_t(span.num.valid) + 3, sizeof(mstudioanimvalue_t), m_Limit))
+                        !Range(offset, size_t(span.num.valid) + 3, sizeof(mstudioanimvalue_t), m_LookaheadLimit))
                     {
                         return Bad("animation interpolation lookahead outside file");
                     }
@@ -568,4 +574,7 @@ private:
     size_t                                      m_Work{};
     studiohdr_t                                 m_Header{};
     UtilAssetsIntegrityCheckResult_StudioModel* m_pResult;
+
+    //Where interpolation reads may end: m_Limit, or past it by the tail callers keep after a sequence group.
+    size_t m_LookaheadLimit;
 };

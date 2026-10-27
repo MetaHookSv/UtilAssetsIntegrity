@@ -283,4 +283,22 @@ void CheckSequenceGroups(HMODULE library, IUtilAssetsIntegrity& api)
     group[runOffset]     = 3;
     group[runOffset + 1] = 2;
     Check(checkGroup(model.bytes.data(), model.header.texturedataindex, 1, group.data(), group.size(), nullptr) != Reason::OK, "RLE valid exceeds total");
+
+    //Stock group files end right after their last span, whose last frame reads the next sample with no weight: that
+    //read lies in the tail callers keep after the group.
+    const std::array<std::int16_t, 3> finalRun{static_cast<std::int16_t>((2 << 8) | 2), 10, 20};
+    std::memcpy(group.data() + runOffset, finalRun.data(), sizeof(finalRun));
+    Expect(Reason::OK, checkGroup(model.bytes.data(), model.header.texturedataindex, 1, group.data(), group.size(), nullptr), "last frame lookahead in the caller's tail");
+
+    //A main model keeps no tail: the same span at the end of its kept structure is rejected, and accepted when it
+    //covers more frames than the sequence, which reads nothing after it.
+    auto       mainModel = StudioFixture{};
+    const auto mainSeq   = mainModel.Read<mstudioseqdesc_t>(mainModel.header.seqindex);
+    const auto mainRun   = mainModel.AppendStructure(finalRun);
+    auto       mainAnim  = mainModel.Read<mstudioanim_t>(mainSeq.animindex);
+    mainAnim.offset[0]   = static_cast<unsigned short>(mainRun - mainSeq.animindex);
+    mainModel.Write(mainSeq.animindex, mainAnim);
+    Check(api.CheckStudioModel(mainModel.bytes.data(), mainModel.bytes.size(), nullptr) != Reason::OK, "main model lookahead past its kept structure");
+    mainModel.Write(mainRun, static_cast<std::int16_t>((3 << 8) | 2));
+    Expect(Reason::OK, api.CheckStudioModel(mainModel.bytes.data(), mainModel.bytes.size(), nullptr), "main model span longer than its sequence");
 }
