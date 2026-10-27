@@ -75,4 +75,5 @@ top-level directory, and verified with `7z t`.
 ## License
 
 The module retains MetaHookSv's [MIT license](LICENSE). Dependencies retain their own
-copyright and license notices; see [third-party notices](THIRD-PARTY-NOTICES.md).
+copyright and license notices in their upstream repositories, pinned in
+`cmake/Dependencies.cmake`.

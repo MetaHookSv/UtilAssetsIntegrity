@@ -184,8 +184,8 @@ svencoop/metahook/dlls/FreeImage/FreeImage.dll    (FreeImaged.dll for Debug)
 ```
 
 The install tree and release archive carry only this runtime `svencoop/` tree. The public header
-lives in the repository's `include/Interface/`, and licenses stay in the repository's
-`THIRD-PARTY-NOTICES.md` and `licenses/`; neither is installed or packaged. Consumers of
+lives in the repository's `include/Interface/` and is not installed or packaged; dependency
+license terms stay in their upstream repositories. Consumers of
 `IUtilAssetsIntegrity.h` also need the SDK's `interface.h`.
 
 ## Repository layout
@@ -197,7 +197,7 @@ lives in the repository's `include/Interface/`, and licenses stay in the reposit
 - `scripts/build-UtilAssetsIntegrity-x86-{Debug,Release}.bat` — configure/build/test/install entry
   points.
 - `docs/build.md` — build commands, dependency inputs, verification gates and migration records.
-- `README.md`, `README.zh-CN.md`, `THIRD-PARTY-NOTICES.md`, `licenses/` — documentation and notices.
+- `README.md`, `README.zh-CN.md` — documentation.
 
 ## Build and verification
 
@@ -236,5 +236,5 @@ override is validated before anything is downloaded).
 ## External documentation
 
 `README.md` is the English landing page and `README.zh-CN.md` the Chinese one; `docs/build.md`
-documents the build inputs, verification gates and packaging, and `THIRD-PARTY-NOTICES.md` plus
-`licenses/` carry the dependency terms.
+documents the build inputs, verification gates and packaging. Dependency terms are documented
+in the upstream repositories pinned by `cmake/Dependencies.cmake`.

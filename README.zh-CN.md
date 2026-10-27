@@ -51,5 +51,5 @@ main push、PR 和手动触发执行 x86 Release 构建测试，`v*` 标签触�
 
 ## 许可证
 
-模块沿用原始 [MIT 许可证](LICENSE)。依赖保留各自许可证，详见
-[第三方声明](THIRD-PARTY-NOTICES.md)。
+模块沿用原始 [MIT 许可证](LICENSE)。依赖保留各自上游仓库中的版权与许可证声明，
+其固定版本见 `cmake/Dependencies.cmake`。
