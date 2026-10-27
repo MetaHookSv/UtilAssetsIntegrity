@@ -8,8 +8,7 @@ Studio 校验已修正边界错误并补充结构与动画检查，详见[校验
 ## 构建与测试
 
 需要 Windows、Visual Studio 2022 的 C++ 桌面开发组件和 Windows SDK、CMake 3.21 以上、Git。
-首次配置自动获取固定版本的 MetaHook SDK、FreeImage、ScopeExit，以及通过 SHA-256 校验的
-VC-LTL 5.3.1 二进制包。仅使用 MetaHook 的 SDK，不构建启动器。
+首次配置自动获取固定版本的 MetaHook SDK、FreeImage、ScopeExit。仅使用 MetaHook 的 SDK，不构建启动器。
 
 ```bat
 scripts\build-UtilAssetsIntegrity-x86-Release.bat
@@ -21,8 +20,8 @@ scripts\build-UtilAssetsIntegrity-x86-Debug.bat
 测试无需启动游戏。
 
 可通过 CMake 参数或同名环境变量指定 `METAHOOK_SOURCE_PATH`、`FREEIMAGE_SOURCE_PATH`、
-`SCOPEEXIT_SOURCE_PATH` 和 `VC_LTL_Root`。CMake 缓存参数优先于环境变量，外部源码树保持只读。
-自动下载的 VC-LTL 缓存在 `thirdparty/cache`。详见[构建说明](docs/build.md)。
+`SCOPEEXIT_SOURCE_PATH`。CMake 缓存参数优先于环境变量，外部源码树保持只读。
+详见[构建说明](docs/build.md)。
 
 ## 安装与调用
 

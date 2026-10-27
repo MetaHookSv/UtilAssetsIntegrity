@@ -12,7 +12,7 @@ been hardened; see [the validation update](docs/studio-validation.md). It preser
 
 Requirements: Windows, Visual Studio 2022 with the C++ desktop workload and Windows SDK,
 CMake 3.21 or newer, and Git. The first configure downloads pinned MetaHook SDK,
-FreeImage and ScopeExit sources, plus the SHA-256 verified VC-LTL 5.3.1 binary package.
+FreeImage and ScopeExit sources.
 MetaHook's launcher and ScopeExit's examples are not built.
 
 ```bat
@@ -33,9 +33,7 @@ take precedence. For example:
 scripts\build-UtilAssetsIntegrity-x86-Release.bat "-DMETAHOOK_SOURCE_PATH=D:/MetaHookSv-org/MetaHook" "-DFREEIMAGE_SOURCE_PATH=D:/MetaHookSv/thirdparty/FreeImage" "-DSCOPEEXIT_SOURCE_PATH=D:/MetaHookSv/thirdparty/ScopeExit"
 ```
 
-`VC_LTL_Root` accepts an existing VC-LTL binary package. Without an override, the
-verified package is cached in `thirdparty/cache`. A direct CMake build can set
-`BUILD_TESTING=OFF`; the convenience scripts require tests to be enabled.
+A direct CMake build can set `BUILD_TESTING=OFF`; the convenience scripts require tests to be enabled.
 
 ## Install and use
 

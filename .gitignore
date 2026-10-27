@@ -1,7 +1,6 @@
 /.vs/
 /build/
 /install/
-/thirdparty/cache/
 *.user
 
 # Generated from the shared FormatValidation source during CMake configuration.

@@ -1,8 +1,6 @@
-set(UTILASSETSINTEGRITY_DEPENDENCY_CACHE_DIR "${PROJECT_SOURCE_DIR}/thirdparty/cache" CACHE PATH "Downloaded binary dependency cache")
 set(METAHOOK_SOURCE_PATH "$ENV{METAHOOK_SOURCE_PATH}" CACHE PATH "MetaHook source tree; empty fetches the pinned SDK")
 set(FREEIMAGE_SOURCE_PATH "$ENV{FREEIMAGE_SOURCE_PATH}" CACHE PATH "FreeImage source tree; empty fetches the pinned commit")
 set(SCOPEEXIT_SOURCE_PATH "$ENV{SCOPEEXIT_SOURCE_PATH}" CACHE PATH "ScopeExit source tree; empty fetches the pinned commit")
-set(VC_LTL_Root "$ENV{VC_LTL_Root}" CACHE PATH "Existing VC-LTL binary package; empty downloads the verified package")
 
 function(utilassetsintegrity_require_files name source)
     foreach(required IN LISTS ARGN)
@@ -17,7 +15,7 @@ function(utilassetsintegrity_fetch_source name url commit out_var)
     FetchContent_Declare(${name}
         GIT_REPOSITORY "${url}" GIT_TAG "${commit}"
         GIT_SUBMODULES "" GIT_SUBMODULES_RECURSE FALSE
-        # Populate only. FreeImage is configured later, after VC-LTL is applied.
+        # Populate only. FreeImage is configured later by CMakeLists.txt.
         SOURCE_SUBDIR _utilassetsintegrity_source_only)
     FetchContent_MakeAvailable(${name})
     set(${out_var} "${${name}_SOURCE_DIR}" PARENT_SCOPE)
@@ -39,12 +37,6 @@ function(utilassetsintegrity_prepare_dependencies)
             set(${dependency}_SOURCE_PATH "${source}")
         endif()
     endforeach()
-    if(VC_LTL_Root)
-        get_filename_component(VC_LTL_Root "${VC_LTL_Root}" ABSOLUTE BASE_DIR "${PROJECT_SOURCE_DIR}")
-        utilassetsintegrity_require_files(VC_LTL_Root "${VC_LTL_Root}"
-            "VC-LTL helper for cmake.cmake" config/config.cmake
-            TargetPlatform/6.0.6000.0/lib/Win32/libucrt.lib)
-    endif()
 
     if(NOT METAHOOK_SOURCE_PATH)
         utilassetsintegrity_fetch_source(utilassetsintegrity_metahook
@@ -54,7 +46,7 @@ function(utilassetsintegrity_prepare_dependencies)
     if(NOT FREEIMAGE_SOURCE_PATH)
         utilassetsintegrity_fetch_source(utilassetsintegrity_freeimage
             https://github.com/hzqst/FreeImage
-            007c9e4c5d4198a1646b6c5274fd855be9cca7ef FREEIMAGE_SOURCE_PATH)
+            2899383825f8f07dbc43d2b589d9d1e13e442449 FREEIMAGE_SOURCE_PATH)
     endif()
     if(NOT SCOPEEXIT_SOURCE_PATH)
         utilassetsintegrity_fetch_source(utilassetsintegrity_scopeexit
@@ -67,12 +59,4 @@ function(utilassetsintegrity_prepare_dependencies)
         set(${dependency}_SOURCE_PATH "${${dependency}_SOURCE_PATH}" PARENT_SCOPE)
         message(STATUS "${dependency}_SOURCE_PATH: ${${dependency}_SOURCE_PATH}")
     endforeach()
-
-    include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/VCLTL.cmake")
-    if(NOT VC_LTL_Root)
-        set(VC_LTL_Root "${UTILASSETSINTEGRITY_DEPENDENCY_CACHE_DIR}/VC-LTL-5.3.1")
-        utilassetsintegrity_prepare_vcltl()
-    endif()
-    set(VC_LTL_Root "${VC_LTL_Root}" PARENT_SCOPE)
-    message(STATUS "VC_LTL_Root: ${VC_LTL_Root}")
 endfunction()

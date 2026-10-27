@@ -172,8 +172,7 @@ deliberately, and each was confirmed in the current source:
   MetaHook's dependency setup does.
 - **ScopeExit**: header-only RAII for the FreeImage memory stream and decoded bitmap.
 - **Build-only inputs, all read-only**: `METAHOOK_SOURCE_PATH`, `FREEIMAGE_SOURCE_PATH` (pinned clone;
-  vendor sources unchanged), `SCOPEEXIT_SOURCE_PATH` and a SHA-256-verified VC-LTL 5.3.1 package in
-  `thirdparty/cache`. VC-LTL is applied once before FreeImage is configured.
+  vendor sources unchanged), `SCOPEEXIT_SOURCE_PATH`.
 - **No game integration**: the library uses no engine gamedata and needs no `plugins.lst` entry; it is
   loaded by other modules at runtime.
 
@@ -194,7 +193,7 @@ lives in the repository's `include/Interface/`, and licenses stay in the reposit
 - `src/UtilAssetsIntegrity.cpp`, `src/dllmain.cpp` — implementation and DLL entry point.
 - `include/Interface/IUtilAssetsIntegrity.h` — public header (shipped with the sources, not installed).
 - `tests/SmokeTests.cpp` — factory, singleton and validation smoke tests (CTest).
-- `CMakeLists.txt`, `cmake/Dependencies.cmake`, `cmake/VCLTL.cmake` — build and dependency pinning.
+- `CMakeLists.txt`, `cmake/Dependencies.cmake` — build and dependency pinning.
 - `scripts/build-UtilAssetsIntegrity-x86-{Debug,Release}.bat` — configure/build/test/install entry
   points.
 - `docs/build.md` — build commands, dependency inputs, verification gates and migration records.
@@ -204,7 +203,7 @@ lives in the repository's `include/Interface/`, and licenses stay in the reposit
 
 `scripts/build-UtilAssetsIntegrity-x86-{Debug,Release}.bat` → CMake (Visual Studio 17 2022,
 `-A Win32`) → compile → CTest → install → repeat the public-interface smoke test against the
-installed DLLs, stopping on failure. Both configurations use C++20, the static CRT with VC-LTL 5.3.1
+installed DLLs, stopping on failure. Both configurations use C++20, the static CRT
 (`/MTd` Debug, `/MT` Release), and Release enables interprocedural optimization. `BUILD_TESTING`
 defaults to `ON` for the scripts; a direct CMake build may set it to `OFF` (the convenience scripts
 require tests to be enabled).
@@ -220,9 +219,9 @@ create a release archive.
 `docs/build.md` records the initial migration verification (both scripts exit 0, CTest 1/1, the
 installed-DLL smoke tests, x86/import/export checks, byte-for-byte source equivalence, and the
 packaging-scope check). Those records are historical: no GitHub-hosted workflow and no in-game
-integration ran locally, and external source trees plus the VC-LTL package must be supplied for
-offline builds (`METAHOOK_SOURCE_PATH`, `FREEIMAGE_SOURCE_PATH`, `SCOPEEXIT_SOURCE_PATH`,
-`VC_LTL_Root`; CMake cache arguments take precedence over environment variables, and a nonempty
+integration ran locally, and external source trees must be supplied for
+offline builds (`METAHOOK_SOURCE_PATH`, `FREEIMAGE_SOURCE_PATH`, `SCOPEEXIT_SOURCE_PATH`;
+CMake cache arguments take precedence over environment variables, and a nonempty
 override is validated before anything is downloaded).
 
 ## Callers
