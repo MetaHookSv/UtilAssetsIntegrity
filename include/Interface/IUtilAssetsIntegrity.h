@@ -57,6 +57,8 @@ public:
 
     //Checks every sequence belonging to groupIndex using the main model's structural header (raw or engine-cached).
     //Unlike standalone IDSQ header validation, this checks the bones, blends, all six RLE channels and interpolation reads.
+    //The interpolation read at the last frame of a run may end up to UTIL_ASSETS_INTEGRITY_SEQUENCE_GROUP_TAIL_BYTES past
+    //the group's bytes, as stock group files do; callers that animate the group keep that many zeroed bytes after it.
     //Appended after the existing methods so their vtable slots and the result layouts stay unchanged.
     virtual UtilAssetsIntegrityCheckReason CheckStudioSequenceGroup(
         const void*                                 model,
@@ -71,3 +73,7 @@ public:
 //UTIL_ASSETS_INTEGRITY_INTERFACE_VERSION through CreateInterface.
 
 #define UTIL_ASSETS_INTEGRITY_INTERFACE_VERSION "UtilAssetsIntegrityAPI_001"
+
+//GoldSrc's animators read the first sample after a run's last span at its last frame, with no weight: up to two
+//mstudioanimvalue_t past that span. Stock group files (such as scientist01.mdl) end before it.
+#define UTIL_ASSETS_INTEGRITY_SEQUENCE_GROUP_TAIL_BYTES 4

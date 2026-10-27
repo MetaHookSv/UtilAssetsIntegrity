@@ -28,10 +28,20 @@ validates only the sequence-file header because the file alone does not describe
 sequences, bones or animation record offsets. It must not be treated as full animation
 validation. All input pointers are borrowed synchronously; the DLL retains none.
 
+At the last frame of a run, GoldSrc's animators read the first sample after its last
+span with no weight (the frame is clamped to `numframes - 1`, where `s` is 0). Every
+stock Half-Life group file (`scientist01.mdl`, `barney01.mdl`, ...) ends before that
+sample, up to two `mstudioanimvalue_t` short. `CheckStudioSequenceGroup()` therefore
+accepts that read up to `UTIL_ASSETS_INTEGRITY_SEQUENCE_GROUP_TAIL_BYTES` (4) past the
+group's bytes; the samples themselves must still lie inside the file. Callers that
+animate a group must keep that many zeroed bytes after it. Main models keep no such
+tail and stay checked against their kept structure.
+
 `tests/StudioModelTests.h` exercises the corrected cases through the real DLL, including
 a string ending at a PAGE_NOACCESS guard page and malformed external RLE channels.
 Both x86 build scripts run these regressions and the existing BMP tests against build
-and installed DLLs. The smoke runner's optional third argument scans an MDL directory.
+and installed DLLs. The smoke runner's optional third argument scans an MDL directory
+and checks each sequence group file found beside a main model against it.
 
 The corrected sources/header/tests were also migrated to HLND2T-DiligentGraphics,
 where a local CMake target builds x86/x64 with the engine SDK and existing FreeImage.

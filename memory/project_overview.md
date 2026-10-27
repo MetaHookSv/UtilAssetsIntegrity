@@ -17,6 +17,10 @@ model validation retains `MAXSTUDIOSKINS=100` and bounds references by `numtextu
 API_001's existing vtable slots and result layouts are preserved. The interface is
 published only through `EXPOSE_SINGLE_INTERFACE`; main-model-aware external animation
 validation is the `CheckStudioSequenceGroup()` method appended to that interface.
+That method lets the last frame's interpolation read end up to
+`UTIL_ASSETS_INTEGRITY_SEQUENCE_GROUP_TAIL_BYTES` (4) past the group, as every stock
+Half-Life group file needs; callers that animate a group keep that many zeroed bytes
+after it, and main models stay checked strictly.
 
 The remainder of this note is the **historical initial-migration snapshot**. Its
 statements about preserved buggy behavior, missing validation and byte-identical

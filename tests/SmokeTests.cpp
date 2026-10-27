@@ -212,7 +212,7 @@ int wmain(int argc, wchar_t** argv)
             return 1;
         if (argc == 4)
         {
-            size_t checked = 0, rejected = 0;
+            size_t checked = 0, checkedGroups = 0, rejected = 0;
             for (const auto& entry : std::filesystem::recursive_directory_iterator(argv[3]))
             {
                 if (!entry.is_regular_file() || entry.path().extension() != L".mdl") continue;
@@ -224,9 +224,34 @@ int wmain(int argc, wchar_t** argv)
                 {
                     ++rejected;
                     std::cout << entry.path().string() << ": " << result.ReasonStr << '\n';
+                    continue;
+                }
+
+                //A group file's header says nothing of its animation: check each group found beside a main model
+                //against it, with the bytes of the main model the engine keeps.
+                studiohdr_t header{};
+                if (std::memcmp(bytes.data(), "IDST", 4))
+                    continue;
+                std::memcpy(&header, bytes.data(), sizeof(header));
+                const auto modelBytes = header.textureindex ? static_cast<size_t>(header.texturedataindex) : bytes.size();
+                for (int group = 1; group < header.numseqgroups; ++group)
+                {
+                    mstudioseqgroup_t record{};
+                    std::memcpy(&record, bytes.data() + header.seqgroupindex + group * sizeof(record), sizeof(record));
+                    const auto    groupPath = entry.path().parent_path() / std::filesystem::path(record.name).filename();
+                    std::ifstream groupInput(groupPath, std::ios::binary);
+                    if (!groupInput)
+                        continue;
+                    const std::vector<char> groupBytes((std::istreambuf_iterator<char>(groupInput)), std::istreambuf_iterator<char>());
+                    ++checkedGroups;
+                    if (api->CheckStudioSequenceGroup(bytes.data(), modelBytes, group, groupBytes.data(), groupBytes.size(), &result) != UtilAssetsIntegrityCheckReason::OK)
+                    {
+                        ++rejected;
+                        std::cout << groupPath.string() << " (group " << group << " of " << entry.path().filename().string() << "): " << result.ReasonStr << '\n';
+                    }
                 }
             }
-            std::cout << "Scanned " << checked << " MDL files; rejected " << rejected << ".\n";
+            std::cout << "Scanned " << checked << " MDL files and " << checkedGroups << " sequence groups against their main models; rejected " << rejected << ".\n";
         }
         std::cout << "Public interface, StudioModel and BMP smoke tests passed.\n";
         return 0;
