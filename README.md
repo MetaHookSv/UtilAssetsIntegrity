@@ -30,7 +30,7 @@ environment variables. Explicit source trees are read-only inputs; CMake cache a
 take precedence. For example:
 
 ```bat
-scripts\build-UtilAssetsIntegrity-x86-Release.bat "-DMETAHOOK_SOURCE_PATH=D:/MetaHookSv-org/MetaHook" "-DFREEIMAGE_SOURCE_PATH=D:/MetaHookSv/thirdparty/FreeImage_clone" "-DSCOPEEXIT_SOURCE_PATH=D:/MetaHookSv/thirdparty/ScopeExit"
+scripts\build-UtilAssetsIntegrity-x86-Release.bat "-DMETAHOOK_SOURCE_PATH=D:/MetaHookSv-org/MetaHook" "-DFREEIMAGE_SOURCE_PATH=D:/MetaHookSv/thirdparty/FreeImage" "-DSCOPEEXIT_SOURCE_PATH=D:/MetaHookSv/thirdparty/ScopeExit"
 ```
 
 `VC_LTL_Root` accepts an existing VC-LTL binary package. Without an override, the

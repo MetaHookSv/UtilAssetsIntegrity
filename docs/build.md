@@ -22,7 +22,7 @@ in Release with VC-LTL; Release enables interprocedural optimization.
 | Input | Required tree | Default |
 | --- | --- | --- |
 | `METAHOOK_SOURCE_PATH` | MetaHook SDK, including `include/metahook.h`, `include/HLSDK/common/interface.cpp`, `include/HLSDK/engine/studio.h`, and `LICENSE` | `MetaHookSv/MetaHook@4d23b6fecd79dc949aabc2e145480cd1328d4a35` |
-| `FREEIMAGE_SOURCE_PATH` | FreeImage clone with `CMakeLists.txt`, `Source/FreeImage.h`, and root license files | `hzqst/FreeImage_clone@c68700b9fe699dbbf99f88a611065f101cba1a41` |
+| `FREEIMAGE_SOURCE_PATH` | FreeImage clone with `CMakeLists.txt`, `Source/FreeImage.h`, and root license files | `hzqst/FreeImage@c68700b9fe699dbbf99f88a611065f101cba1a41` |
 | `SCOPEEXIT_SOURCE_PATH` | ScopeExit with `include/ScopeExit/ScopeExit.h` and `LICENSE` | `SergiusTheBest/ScopeExit@bd345da594a4675d04de663d93d00cb81b6678b2` |
 | `VC_LTL_Root` | VC-LTL binary package with its helper, configuration and Win32 libraries | Downloaded VC-LTL 5.3.1 |
 
