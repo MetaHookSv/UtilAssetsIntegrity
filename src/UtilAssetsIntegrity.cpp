@@ -104,6 +104,21 @@ public:
     {
         return CBSPValidation(buf, bufSize, layout, result).Check();
     }
+
+    UtilAssetsIntegrityCheckReason CheckSprite(const void* buf, size_t bufSize, UtilAssetsIntegrityCheckResult* result) noexcept override
+    {
+        return TextureAssetValidation::Sprite(buf, bufSize, result);
+    }
+
+    UtilAssetsIntegrityCheckReason CheckWADDirectory(const void* buf, size_t bufSize, UtilAssetsIntegrityCheckResult* result) noexcept override
+    {
+        return TextureAssetValidation::WADDirectory(buf, bufSize, result);
+    }
+
+    UtilAssetsIntegrityCheckReason CheckMiptex(const void* buf, size_t bufSize, UtilAssetsIntegrityCheckResult* result) noexcept override
+    {
+        return TextureAssetValidation::Miptex(buf, bufSize, false, result);
+    }
 };
 
 EXPOSE_SINGLE_INTERFACE(CUtilAssetsIntegrity, IUtilAssetsIntegrity, UTIL_ASSETS_INTEGRITY_INTERFACE_VERSION);

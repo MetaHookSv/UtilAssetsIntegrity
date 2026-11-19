@@ -135,7 +135,7 @@ struct BSPFixture
 
         Append(Textures, std::int32_t{1});
         Append(Textures, static_cast<std::int32_t>(MiptexOffset));
-        Miptex miptex{"fixture", Side, Side, {sizeof(Miptex), 0, 0, 0}};
+        Miptex miptex{"fixture", Side, Side, {sizeof(Miptex), sizeof(Miptex) + Side * Side, sizeof(Miptex) + Side * Side * 5 / 4, sizeof(Miptex) + Side * Side * 21 / 16}};
         Append(Textures, miptex);
         lumps[Textures].resize(lumps[Textures].size() + MipBytes);
         Append(Textures, static_cast<std::uint16_t>(PaletteColors));
