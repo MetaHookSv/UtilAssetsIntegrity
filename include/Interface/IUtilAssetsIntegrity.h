@@ -49,6 +49,28 @@ public:
     size_t MaxSize;
 };
 
+//Order of a BSP file's lump table. Blue Shift's brush files swap the entities and planes entries; the file does not say
+//which it uses, so the caller passes the layout it loads the file with.
+enum class UtilAssetsIntegrityBSPLayout
+{
+    GoldSrc = 0,
+    BlueShift,
+};
+
+class UtilAssetsIntegrityCheckResult_BSP : public UtilAssetsIntegrityCheckResult
+{
+public:
+    UtilAssetsIntegrityCheckResult_BSP() : UtilAssetsIntegrityCheckResult()
+    {
+        MaxLeafs = 0;
+    }
+
+public:
+    //Leaf records the caller's PVS buffers hold (an engine's MAX_MAP_LEAFS). As with the BMP limits, zero is enforced
+    //and a null result pointer skips the limit.
+    size_t MaxLeafs;
+};
+
 class IUtilAssetsIntegrity : public IBaseInterface
 {
 public:
@@ -67,6 +89,15 @@ public:
         const void*                                 group,
         size_t                                      groupBytes,
         UtilAssetsIntegrityCheckResult_StudioModel* result) = 0;
+
+    //Checks a version 30 BSP before any of it is parsed: every lump range and record size, every cross-reference as the
+    //GoldSrc engine interprets it, the light samples and visibility rows it decodes, and that its node and clipnode
+    //graphs are acyclic and shallow enough to recurse. Appended after the existing methods, as above.
+    virtual UtilAssetsIntegrityCheckReason CheckBSP(
+        const void*                         buf,
+        size_t                              bufSize,
+        UtilAssetsIntegrityBSPLayout        layout,
+        UtilAssetsIntegrityCheckResult_BSP* result) = 0;
 };
 
 //The interface is published only through EXPOSE_SINGLE_INTERFACE; callers resolve

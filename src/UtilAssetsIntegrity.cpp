@@ -1,5 +1,6 @@
 #include <IUtilAssetsIntegrity.h>
 #include "StudioModelValidation.h"
+#include "BSPValidation.h"
 
 #include <memory>
 #include <limits>
@@ -93,6 +94,15 @@ public:
         UtilAssetsIntegrityCheckResult_StudioModel* result) noexcept override
     {
         return CStudioModelValidation(group, groupBytes, result).CheckGroup(model, modelBytes, groupIndex);
+    }
+
+    UtilAssetsIntegrityCheckReason CheckBSP(
+        const void*                         buf,
+        size_t                              bufSize,
+        UtilAssetsIntegrityBSPLayout        layout,
+        UtilAssetsIntegrityCheckResult_BSP* result) noexcept override
+    {
+        return CBSPValidation(buf, bufSize, layout, result).Check();
     }
 };
 

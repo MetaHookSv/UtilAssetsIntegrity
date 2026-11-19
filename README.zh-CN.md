@@ -1,6 +1,6 @@
 # UtilAssetsIntegrity
 
-用于检查 GoldSrc StudioModel 和索引色 BMP 图像的 Windows x86 工具 DLL。
+用于检查 GoldSrc StudioModel、BSP 地图文件和索引色 BMP 图像的 Windows x86 工具 DLL。
 源码来自 [MetaHookSv](https://github.com/MetaHookSv/MetaHookSv/tree/main/PluginLibs/UtilAssetsIntegrity)，
 保留 `CreateInterface("UtilAssetsIntegrityAPI_001", ...)` 的 vtable 和结果布局；
 Studio 校验已修正边界错误并补充结构与动画检查，详见[校验更新](docs/studio-validation.md)。
@@ -39,6 +39,9 @@ scripts\build-UtilAssetsIntegrity-x86-Debug.bat
 - `CheckStudioSequenceGroup` 依据主模型检查 IDSQ 文件的动画数据。原版序列组文件需要
   最后一帧的插值前瞻读取越过文件末尾，因此允许其最多越过
   `UTIL_ASSETS_INTEGRITY_SEQUENCE_GROUP_TAIL_BYTES` 字节；对序列组做动画的调用方需在数据后保留同样多的零字节。
+- `CheckBSP` 按调用方给出的 lump 布局（GoldSrc 或 Blue Shift），在引擎解析之前检查版本 30 的
+  地图文件：lump 范围、所有交叉引用、光照采样、可见性行和节点图。`MaxLeafs` 以调用方的 PVS
+  容量限制叶子数。详见 [BSP 校验](docs/bsp-validation.md)。
 - `Check8bitBMP` 使用 FreeImage 的索引色分类检查图像，传入结果对象时应用
   `MaxWidth`、`MaxHeight` 和 `MaxSize` 限制。
 - `MaxSize` 指解码后的像素数量，三项限制默认为零，检查非空图像前需要设置；
