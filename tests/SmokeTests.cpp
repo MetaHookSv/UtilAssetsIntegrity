@@ -174,6 +174,7 @@ void CheckBmps(IUtilAssetsIntegrity& api)
 }
 #include "StudioModelTests.h"
 #include "BSPTests.h"
+#include "TextureAssetTests.h"
 } // namespace
 
 int wmain(int argc, wchar_t** argv)
@@ -210,14 +211,25 @@ int wmain(int argc, wchar_t** argv)
         CheckSequenceGroups(library.handle, *api);
         CheckBmps(*api);
         CheckBSPs(*api);
+        CheckTextureAssets(*api);
         if (failures != 0)
             return 1;
         if (argc == 4)
         {
-            size_t checked = 0, checkedGroups = 0, checkedMaps = 0, rejected = 0;
+            TextureScanCounts textureCounts;
+            size_t            checked = 0, checkedGroups = 0, checkedMaps = 0, rejected = 0;
             for (const auto& entry : std::filesystem::recursive_directory_iterator(argv[3]))
             {
-                if (entry.is_regular_file() && entry.path().extension() == L".bsp")
+                if (!entry.is_regular_file())
+                    continue;
+                const auto ext      = entry.path().extension();
+                const bool isSprite = !_wcsicmp(ext.c_str(), L".spr");
+                if (isSprite || !_wcsicmp(ext.c_str(), L".wad"))
+                {
+                    ScanTextureAsset(*api, entry.path(), isSprite, textureCounts);
+                    continue;
+                }
+                if (ext == L".bsp")
                 {
                     //Brush files below a bshift directory use Blue Shift's lump table, as the engine picks it by game.
                     auto layout = UtilAssetsIntegrityBSPLayout::GoldSrc;
@@ -277,9 +289,13 @@ int wmain(int argc, wchar_t** argv)
                     }
                 }
             }
+            std::cout << std::filesystem::path(argv[3]).string() << ": " << textureCounts.sprites << " sprites, " << textureCounts.wads
+                      << " WADs, " << textureCounts.textures << " miptex lumps; rejected " << textureCounts.rejected << ".\n";
+            if (textureCounts.rejected)
+                return 1;
             std::cout << "Scanned " << checked << " MDL files, " << checkedGroups << " sequence groups against their main models and " << checkedMaps << " BSP files; rejected " << rejected << ".\n";
         }
-        std::cout << "Public interface, StudioModel, BMP and BSP smoke tests passed.\n";
+        std::cout << "Public interface, StudioModel, BMP, BSP, sprite and WAD smoke tests passed.\n";
         return 0;
     }
     catch (const std::exception& error)

@@ -98,6 +98,12 @@ public:
         size_t                              bufSize,
         UtilAssetsIntegrityBSPLayout        layout,
         UtilAssetsIntegrityCheckResult_BSP* result) = 0;
+
+    //Version 2 IDSP, a complete WAD2/WAD3 file (directory ranges only), and one unpacked
+    //GoldSrc miptex with pixel and palette data, respectively. Diagnostics are optional.
+    virtual UtilAssetsIntegrityCheckReason CheckSprite(const void* buf, size_t bufSize, UtilAssetsIntegrityCheckResult* result)       = 0;
+    virtual UtilAssetsIntegrityCheckReason CheckWADDirectory(const void* buf, size_t bufSize, UtilAssetsIntegrityCheckResult* result) = 0;
+    virtual UtilAssetsIntegrityCheckReason CheckMiptex(const void* buf, size_t bufSize, UtilAssetsIntegrityCheckResult* result)       = 0;
 };
 
 //The interface is published only through EXPOSE_SINGLE_INTERFACE; callers resolve

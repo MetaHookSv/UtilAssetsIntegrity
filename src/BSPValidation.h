@@ -1,6 +1,6 @@
 #pragma once
 
-#include <IUtilAssetsIntegrity.h>
+#include "TextureAssetValidation.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -121,25 +121,17 @@ private:
     static constexpr size_t ModelVisLeafsOffset  = 52;
     static constexpr size_t ModelFirstFaceOffset = 56;
     static constexpr size_t ModelFaceCountOffset = 60;
-    static constexpr size_t MiptexWidthOffset    = 16;
-    static constexpr size_t MiptexHeightOffset   = 20;
-    static constexpr size_t MiptexPixelsOffset   = 24;
-    static constexpr size_t MiptexNameBytes      = 16;
 
-    static constexpr int    Axes            = 3;
-    static constexpr int    TextureAxes     = 2;
-    static constexpr int    TextureVecs     = 4;
-    static constexpr int    Hulls           = 4;
-    static constexpr int    LightStyles     = 4;
-    static constexpr int    NoLightStyle    = 255;
-    static constexpr int    LightSample     = 3;
-    static constexpr int    LuxelSize       = 16;
-    static constexpr int    TexSpecial      = 1;
-    static constexpr int    AbsentOffset    = -1;
-    static constexpr int    MaxTextureSide  = 16384;
-    static constexpr int    TextureAlign    = 16;
-    static constexpr size_t PaletteColors   = 256;
-    static constexpr size_t PaletteCountLen = sizeof(std::uint16_t);
+    static constexpr int Axes         = 3;
+    static constexpr int TextureAxes  = 2;
+    static constexpr int TextureVecs  = 4;
+    static constexpr int Hulls        = 4;
+    static constexpr int LightStyles  = 4;
+    static constexpr int NoLightStyle = 255;
+    static constexpr int LightSample  = 3;
+    static constexpr int LuxelSize    = 16;
+    static constexpr int TexSpecial   = 1;
+    static constexpr int AbsentOffset = -1;
     //A face whose extents exceed this either errors in CalcSurfaceExtents or is TEX_SPECIAL, which has no lightmap.
     static constexpr int MaxSurfaceExtent = 512;
     //CalcSurfaceExtents' starting extremes, kept as its floats.
@@ -326,32 +318,9 @@ private:
                 return Bad("miptex outside lump");
 
             const auto miptex = base + static_cast<size_t>(offset);
-            if (!std::memchr(m_pData + miptex, 0, MiptexNameBytes))
-                return Bad("unterminated miptex name");
-
-            const auto width  = Read<std::uint32_t>(miptex + MiptexWidthOffset);
-            const auto height = Read<std::uint32_t>(miptex + MiptexHeightOffset);
-            if (!width || !height || width > MaxTextureSide || height > MaxTextureSide)
-                return Bad("invalid miptex dimensions", Reason::InvalidFormat);
-
-            //Textures without embedded pixels come from the WADs by name.
-            if (!Read<std::uint32_t>(miptex + MiptexPixelsOffset))
-                continue;
-
-            if ((width % TextureAlign) || (height % TextureAlign))
-                return Bad("miptex is not 16 aligned", Reason::InvalidFormat);
-
-            //Four mip levels: 1 + 1/4 + 1/16 + 1/64 of the pixels, as the engine's width * height / 64 * 85.
-            const auto pixelBytes   = std::uint64_t(width) * height / 64 * 85;
-            const auto paletteCount = miptex + MiptexBytes + pixelBytes;
-            const auto end          = base + length;
-            if (paletteCount > end || PaletteCountLen > end - paletteCount)
-                return Bad("miptex pixels outside lump");
-
-            const auto colors = Read<std::uint16_t>(static_cast<size_t>(paletteCount));
-            const auto bytes  = std::uint64_t(colors < PaletteColors ? PaletteColors : colors) * LightSample;
-            if (bytes > end - paletteCount - PaletteCountLen)
-                return Bad("miptex palette outside lump");
+            m_Reason          = TextureAssetValidation::Miptex(m_pData + miptex, length - offset, true, m_pResult);
+            if (m_Reason != Reason::OK)
+                return false;
         }
 
         return true;
