@@ -22,6 +22,26 @@ That method lets the last frame's interpolation read end up to
 Half-Life group file needs; callers that animate a group keep that many zeroed bytes
 after it, and main models stay checked strictly.
 
+BSP brush files are checked by `CheckBSP()`, appended after `CheckStudioSequenceGroup()`
+and implemented in `src/BSPValidation.h`. It validates a version 30 file before an engine
+parses it, reading every field as the GoldSrc engine reads it (signed `dface_t` and
+clipnode shorts, unsigned node face, leaf mark and mark surface values): lump ranges and
+record sizes, all cross-references, embedded miptex data, the light samples
+`RecursiveLightPoint`/`R_BuildLightMap` read, every visibility row decoded as
+`CM_DecompressPVS` decodes it (row length from model 0's `visleafs`; a run may end at the
+longer compiled row, padded to 64 leaves or covering every leaf), and acyclic node and
+clipnode graphs at most 1024 levels deep, with the drawing tree below node 0 unshared.
+A scan of 496 installed brush files accepted all but two the engine also refuses; the
+stock files it first rejected shaped the relaxed rules (clipping heads at the clipnode
+count, runs past the engine row, offset 0 without lighting or visibility, unterminated
+entities), as the sequence-group tail did for Studio validation.
+The caller passes the lump layout (`UtilAssetsIntegrityBSPLayout`, GoldSrc or Blue Shift)
+and its PVS capacity in `UtilAssetsIntegrityCheckResult_BSP::MaxLeafs`. See
+`docs/bsp-validation.md` for the rules and what stays with the caller (WAD textures,
+draw-dependent limits such as the 64-edge warp polygon, terminating the entities, not
+tracing a hull whose head is the clipnode count, clipping visibility runs to rows sized
+by the visible leaves).
+
 The remainder of this note is the **historical initial-migration snapshot**. Its
 statements about preserved buggy behavior, missing validation and byte-identical
 sources describe that snapshot, not the current implementation. In particular, a
@@ -196,11 +216,14 @@ license terms stay in their upstream repositories. Consumers of
 
 - `src/UtilAssetsIntegrity.cpp`, `src/dllmain.cpp` — implementation and DLL entry point.
 - `include/Interface/IUtilAssetsIntegrity.h` — public header (shipped with the sources, not installed).
+- `src/StudioModelValidation.h`, `src/BSPValidation.h` — the Studio and BSP validators.
 - `tests/SmokeTests.cpp` — factory, singleton and validation smoke tests (CTest).
+- `tests/StudioModelTests.h`, `tests/BSPTests.h` — Studio and BSP regressions run by the smoke tests.
 - `CMakeLists.txt`, `cmake/Dependencies.cmake` — build and dependency pinning.
 - `scripts/build-UtilAssetsIntegrity-x86-{Debug,Release}.bat` — configure/build/test/install entry
   points.
 - `docs/build.md` — build commands, dependency inputs, verification gates and migration records.
+- `docs/studio-validation.md`, `docs/bsp-validation.md` — the current validation guarantees.
 - `README.md`, `README.zh-CN.md` — documentation.
 
 ## Build and verification

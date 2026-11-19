@@ -173,6 +173,7 @@ void CheckBmps(IUtilAssetsIntegrity& api)
     Expect(Reason::BogusHeader, api.Check8bitBMP(image.data(), sizeof(BITMAPFILEHEADER), &result), "truncated BMP");
 }
 #include "StudioModelTests.h"
+#include "BSPTests.h"
 } // namespace
 
 int wmain(int argc, wchar_t** argv)
@@ -180,7 +181,7 @@ int wmain(int argc, wchar_t** argv)
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
     if (argc != 3 && argc != 4)
     {
-        std::cerr << "Usage: UtilAssetsIntegritySmokeTests <UtilAssetsIntegrity.dll> <FreeImage DLL> [model directory]\n";
+        std::cerr << "Usage: UtilAssetsIntegritySmokeTests <UtilAssetsIntegrity.dll> <FreeImage DLL> [asset directory]\n";
         return 2;
     }
     try
@@ -208,13 +209,38 @@ int wmain(int argc, wchar_t** argv)
         CheckStudioRegressions(*api);
         CheckSequenceGroups(library.handle, *api);
         CheckBmps(*api);
+        CheckBSPs(*api);
         if (failures != 0)
             return 1;
         if (argc == 4)
         {
-            size_t checked = 0, checkedGroups = 0, rejected = 0;
+            size_t checked = 0, checkedGroups = 0, checkedMaps = 0, rejected = 0;
             for (const auto& entry : std::filesystem::recursive_directory_iterator(argv[3]))
             {
+                if (entry.is_regular_file() && entry.path().extension() == L".bsp")
+                {
+                    //Brush files below a bshift directory use Blue Shift's lump table, as the engine picks it by game.
+                    auto layout = UtilAssetsIntegrityBSPLayout::GoldSrc;
+                    for (const auto& part : entry.path())
+                    {
+                        if (!_wcsicmp(part.c_str(), L"bshift"))
+                            layout = UtilAssetsIntegrityBSPLayout::BlueShift;
+                    }
+
+                    std::ifstream                      input(entry.path(), std::ios::binary);
+                    const std::vector<char>            bytes((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+                    UtilAssetsIntegrityCheckResult_BSP result;
+                    //Capacity is the caller's: a scan checks the format alone.
+                    result.MaxLeafs = SIZE_MAX;
+                    ++checkedMaps;
+                    if (api->CheckBSP(bytes.data(), bytes.size(), layout, &result) != UtilAssetsIntegrityCheckReason::OK)
+                    {
+                        ++rejected;
+                        std::cout << entry.path().string() << ": " << result.ReasonStr << '\n';
+                    }
+                    continue;
+                }
+
                 if (!entry.is_regular_file() || entry.path().extension() != L".mdl") continue;
                 std::ifstream                              input(entry.path(), std::ios::binary);
                 const std::vector<char>                    bytes((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
@@ -251,9 +277,9 @@ int wmain(int argc, wchar_t** argv)
                     }
                 }
             }
-            std::cout << "Scanned " << checked << " MDL files and " << checkedGroups << " sequence groups against their main models; rejected " << rejected << ".\n";
+            std::cout << "Scanned " << checked << " MDL files, " << checkedGroups << " sequence groups against their main models and " << checkedMaps << " BSP files; rejected " << rejected << ".\n";
         }
-        std::cout << "Public interface, StudioModel and BMP smoke tests passed.\n";
+        std::cout << "Public interface, StudioModel, BMP and BSP smoke tests passed.\n";
         return 0;
     }
     catch (const std::exception& error)

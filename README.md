@@ -1,6 +1,6 @@
 # UtilAssetsIntegrity
 
-A Windows x86 utility DLL for checking GoldSrc StudioModel assets and indexed-color BMP images.
+A Windows x86 utility DLL for checking GoldSrc StudioModel assets, BSP brush files and indexed-color BMP images.
 Originally part of [MetaHookSv](https://github.com/MetaHookSv/MetaHookSv/tree/main/PluginLibs/UtilAssetsIntegrity).
 
 The initial migration preserved the original behavior. Studio validation has since
@@ -23,7 +23,7 @@ scripts\build-UtilAssetsIntegrity-x86-Debug.bat
 Each script configures, builds, runs CTest, installs, and repeats the public-interface
 smoke tests against the installed DLLs. Output is under `build/x86/<Configuration>`
 and `install/x86/<Configuration>`. Tests dynamically load the DLL, obtain its factory,
-and check StudioModel and BMP behavior without running a game.
+and check StudioModel, BMP and BSP behavior without running a game.
 
 Local source trees can override automatic downloads through CMake cache arguments or
 environment variables. Explicit source trees are read-only inputs; CMake cache arguments
@@ -60,6 +60,10 @@ using the interface and do not delete the instance.
   It accepts the last frame's interpolation read up to
   `UTIL_ASSETS_INTEGRITY_SEQUENCE_GROUP_TAIL_BYTES` past the group, as stock group
   files need; callers that animate the group keep that many zeroed bytes after it.
+- `CheckBSP` checks a version 30 brush file in the given lump layout (GoldSrc or Blue
+  Shift) before an engine parses it: lump ranges, every cross-reference, light samples,
+  visibility rows and the node graphs. `MaxLeafs` bounds the leaf count with the
+  caller's PVS capacity. See [BSP validation](docs/bsp-validation.md).
 - `Check8bitBMP` checks for FreeImage's indexed-color classification and applies
   `MaxWidth`, `MaxHeight` and `MaxSize` when a result object is supplied.
 - `MaxSize` is the decoded pixel count, not the input file size. All three limits
