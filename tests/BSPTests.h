@@ -439,7 +439,19 @@ void CheckBSPs(IUtilAssetsIntegrity& api)
         texInfo.vecs[0][0] = 40;
         f.Set(F::TexInfos, texInfo);
         expect(Reason::InvalidFormat, f, "BSP surface extents over 512");
-        texInfo.flags = 1;
+        //SvEngine allows surface extents up to 1024 when lightmap samples cover the face.
+        f.lumps[F::Lighting].assign(41 * 2 * 3, 0);
+        const auto svFile = f.Build();
+        Expect(Reason::InvalidFormat, api.CheckBSP(svFile.data(), svFile.size(), Layout::GoldSrc, &result, false), "BSP surface extents 640 rejected in GoldSrc");
+        Expect(Reason::OK, api.CheckBSP(svFile.data(), svFile.size(), Layout::GoldSrc, &result, true), "BSP surface extents 640 accepted in SvEngine");
+        texInfo.vecs[0][0] = 65; // 1040 texels wide (> 1024)
+        f.Set(F::TexInfos, texInfo);
+        f.lumps[F::Lighting].assign(66 * 2 * 3, 0);
+        const auto svTooLarge = f.Build();
+        Expect(Reason::InvalidFormat, api.CheckBSP(svTooLarge.data(), svTooLarge.size(), Layout::GoldSrc, &result, true), "BSP surface extents over 1024 rejected in SvEngine");
+
+        texInfo.vecs[0][0] = 40;
+        texInfo.flags      = 1;
         f.Set(F::TexInfos, texInfo);
         expect(Reason::OK, f, "BSP large special surface has no lightmap");
     }

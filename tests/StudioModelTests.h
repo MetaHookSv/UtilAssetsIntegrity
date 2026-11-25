@@ -301,4 +301,28 @@ void CheckSequenceGroups(HMODULE library, IUtilAssetsIntegrity& api)
     Check(api.CheckStudioModel(mainModel.bytes.data(), mainModel.bytes.size(), nullptr) != Reason::OK, "main model lookahead past its kept structure");
     mainModel.Write(mainRun, static_cast<std::int16_t>((3 << 8) | 2));
     Expect(Reason::OK, api.CheckStudioModel(mainModel.bytes.data(), mainModel.bytes.size(), nullptr), "main model span longer than its sequence");
+
+    //SvEngine relaxations: trailing padding and >4 attachments (up to 64).
+    {
+        const StudioFixture valid{};
+        auto                padded = valid;
+        padded.bytes.resize(padded.bytes.size() + 16, 0);
+        Check(api.CheckStudioModel(padded.bytes.data(), padded.bytes.size(), nullptr, false) != Reason::OK, "trailing MDL padding rejected in GoldSrc");
+        Expect(Reason::OK, api.CheckStudioModel(padded.bytes.data(), padded.bytes.size(), nullptr, true), "trailing MDL padding accepted in SvEngine");
+
+        auto                               manyAttachments = valid;
+        std::array<mstudioattachment_t, 8> attachments{};
+        manyAttachments.header.numattachments  = static_cast<int>(attachments.size());
+        manyAttachments.header.attachmentindex = manyAttachments.AppendStructure(attachments);
+        manyAttachments.Finish();
+        Check(api.CheckStudioModel(manyAttachments.bytes.data(), manyAttachments.bytes.size(), nullptr, false) != Reason::OK, "8 attachments rejected in GoldSrc");
+        Expect(Reason::OK, api.CheckStudioModel(manyAttachments.bytes.data(), manyAttachments.bytes.size(), nullptr, true), "8 attachments accepted in SvEngine");
+
+        auto                                tooManyAttachments = valid;
+        std::array<mstudioattachment_t, 65> overflowAttachments{};
+        tooManyAttachments.header.numattachments  = static_cast<int>(overflowAttachments.size());
+        tooManyAttachments.header.attachmentindex = tooManyAttachments.AppendStructure(overflowAttachments);
+        tooManyAttachments.Finish();
+        Check(api.CheckStudioModel(tooManyAttachments.bytes.data(), tooManyAttachments.bytes.size(), nullptr, true) != Reason::OK, "65 attachments rejected in SvEngine");
+    }
 }

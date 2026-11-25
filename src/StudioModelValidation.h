@@ -22,12 +22,13 @@ class CStudioModelValidation
 public:
     using Reason = UtilAssetsIntegrityCheckReason;
 
-    CStudioModelValidation(const void* pData, size_t size, UtilAssetsIntegrityCheckResult_StudioModel* pResult) :
+    CStudioModelValidation(const void* pData, size_t size, UtilAssetsIntegrityCheckResult_StudioModel* pResult, bool bIsSvEngine = false) :
         m_pData(static_cast<const byte*>(pData)),
         m_Size(size),
         m_Limit(size),
         m_pResult(pResult),
-        m_LookaheadLimit(size)
+        m_LookaheadLimit(size),
+        m_bIsSvEngine(bIsSvEngine)
     {
         if (m_pResult)
             m_pResult->ReasonStr[0] = 0;
@@ -55,8 +56,18 @@ public:
         if (m_Header.version != 10)
             return Fail("expected studio version 10", Reason::VersionMismatch);
 
-        if (m_Header.length < sizeof(studiohdr_t) || static_cast<size_t>(m_Header.length) != m_Size)
+        if (m_Header.length < sizeof(studiohdr_t) ||
+            (m_bIsSvEngine ? static_cast<size_t>(m_Header.length) > m_Size : static_cast<size_t>(m_Header.length) != m_Size))
+        {
             return Fail("invalid file length");
+        }
+
+        if (m_bIsSvEngine && static_cast<size_t>(m_Header.length) < m_Size)
+        {
+            m_Size           = static_cast<size_t>(m_Header.length);
+            m_Limit          = m_Size;
+            m_LookaheadLimit = m_Size;
+        }
 
         //Header names are the source path studiomdl wrote, which may fill the field unterminated (Counter-Strike's
         //v_knife.mdl), as the original engine accepts; only names of records must be terminated.
@@ -102,7 +113,7 @@ public:
         if (!pModel || modelBytes < sizeof(studiohdr_t) || modelBytes > INT_MAX)
             return Fail("missing main model for sequence group");
 
-        CStudioModelValidation model(pModel, modelBytes, m_pResult);
+        CStudioModelValidation model(pModel, modelBytes, m_pResult, m_bIsSvEngine);
         model.m_Header = model.Read<studiohdr_t>(0);
         const auto& h  = model.m_Header;
 
@@ -526,9 +537,11 @@ private:
 
     bool HitboxesAndAttachments()
     {
-        const auto& h = m_Header;
+        static constexpr int SvEngineAttachmentsLimit = 64;
+        const auto&          h                        = m_Header;
+        const int            attachmentsLimit         = m_bIsSvEngine ? SvEngineAttachmentsLimit : AttachmentsLimit;
         if (!Table(h.hitboxindex, h.numhitboxes, sizeof(mstudiobbox_t), HitboxesLimit) ||
-            !Table(h.attachmentindex, h.numattachments, sizeof(mstudioattachment_t), AttachmentsLimit))
+            !Table(h.attachmentindex, h.numattachments, sizeof(mstudioattachment_t), attachmentsLimit))
         {
             return false;
         }
@@ -577,4 +590,5 @@ private:
 
     //Where interpolation reads may end: m_Limit, or past it by the tail callers keep after a sequence group.
     size_t m_LookaheadLimit;
+    bool   m_bIsSvEngine;
 };
