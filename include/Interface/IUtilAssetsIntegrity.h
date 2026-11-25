@@ -74,8 +74,8 @@ public:
 class IUtilAssetsIntegrity : public IBaseInterface
 {
 public:
-    virtual UtilAssetsIntegrityCheckReason CheckStudioModel(const void* buf, size_t bufSize, UtilAssetsIntegrityCheckResult_StudioModel* checkResult) = 0;
-    virtual UtilAssetsIntegrityCheckReason Check8bitBMP(const void* buf, size_t bufSize, UtilAssetsIntegrityCheckResult_BMP* checkResult)             = 0;
+    virtual UtilAssetsIntegrityCheckReason CheckStudioModel(const void* buf, size_t bufSize, UtilAssetsIntegrityCheckResult_StudioModel* checkResult, bool bIsSvEngine = false) = 0;
+    virtual UtilAssetsIntegrityCheckReason Check8bitBMP(const void* buf, size_t bufSize, UtilAssetsIntegrityCheckResult_BMP* checkResult)                                       = 0;
 
     //Checks every sequence belonging to groupIndex using the main model's structural header (raw or engine-cached).
     //Unlike standalone IDSQ header validation, this checks the bones, blends, all six RLE channels and interpolation reads.
@@ -88,7 +88,8 @@ public:
         int                                         groupIndex,
         const void*                                 group,
         size_t                                      groupBytes,
-        UtilAssetsIntegrityCheckResult_StudioModel* result) = 0;
+        UtilAssetsIntegrityCheckResult_StudioModel* result,
+        bool                                        bIsSvEngine = false) = 0;
 
     //Checks a version 30 BSP before any of it is parsed: every lump range and record size, every cross-reference as the
     //GoldSrc engine interprets it, the light samples and visibility rows it decodes, and that its node and clipnode
@@ -97,7 +98,8 @@ public:
         const void*                         buf,
         size_t                              bufSize,
         UtilAssetsIntegrityBSPLayout        layout,
-        UtilAssetsIntegrityCheckResult_BSP* result) = 0;
+        UtilAssetsIntegrityCheckResult_BSP* result,
+        bool                                bIsSvEngine = false) = 0;
 
     //Version 2 IDSP, a complete WAD2/WAD3 file (directory ranges only), and one unpacked
     //GoldSrc miptex with pixel and palette data, respectively. Diagnostics are optional.

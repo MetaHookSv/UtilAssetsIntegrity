@@ -14,9 +14,10 @@ public:
     UtilAssetsIntegrityCheckReason CheckStudioModel(
         const void*                                 buf,
         size_t                                      bufSize,
-        UtilAssetsIntegrityCheckResult_StudioModel* checkResult) noexcept override
+        UtilAssetsIntegrityCheckResult_StudioModel* checkResult,
+        bool                                        bIsSvEngine) noexcept override
     {
-        return CStudioModelValidation(buf, bufSize, checkResult).Check();
+        return CStudioModelValidation(buf, bufSize, checkResult, bIsSvEngine).Check();
     }
 
     UtilAssetsIntegrityCheckReason Check8bitBMP(
@@ -91,18 +92,20 @@ public:
         int                                         groupIndex,
         const void*                                 group,
         size_t                                      groupBytes,
-        UtilAssetsIntegrityCheckResult_StudioModel* result) noexcept override
+        UtilAssetsIntegrityCheckResult_StudioModel* result,
+        bool                                        bIsSvEngine) noexcept override
     {
-        return CStudioModelValidation(group, groupBytes, result).CheckGroup(model, modelBytes, groupIndex);
+        return CStudioModelValidation(group, groupBytes, result, bIsSvEngine).CheckGroup(model, modelBytes, groupIndex);
     }
 
     UtilAssetsIntegrityCheckReason CheckBSP(
         const void*                         buf,
         size_t                              bufSize,
         UtilAssetsIntegrityBSPLayout        layout,
-        UtilAssetsIntegrityCheckResult_BSP* result) noexcept override
+        UtilAssetsIntegrityCheckResult_BSP* result,
+        bool                                bIsSvEngine) noexcept override
     {
-        return CBSPValidation(buf, bufSize, layout, result).Check();
+        return CBSPValidation(buf, bufSize, layout, result, bIsSvEngine).Check();
     }
 
     UtilAssetsIntegrityCheckReason CheckSprite(const void* buf, size_t bufSize, UtilAssetsIntegrityCheckResult* result) noexcept override

@@ -19,11 +19,12 @@ public:
     using Reason = UtilAssetsIntegrityCheckReason;
     using Layout = UtilAssetsIntegrityBSPLayout;
 
-    CBSPValidation(const void* pData, size_t size, Layout layout, UtilAssetsIntegrityCheckResult_BSP* pResult) :
+    CBSPValidation(const void* pData, size_t size, Layout layout, UtilAssetsIntegrityCheckResult_BSP* pResult, bool bIsSvEngine = false) :
         m_pData(static_cast<const std::uint8_t*>(pData)),
         m_Size(size),
         m_Layout(layout),
-        m_pResult(pResult)
+        m_pResult(pResult),
+        m_bIsSvEngine(bIsSvEngine)
     {
         if (m_pResult)
             m_pResult->ReasonStr[0] = 0;
@@ -133,10 +134,12 @@ private:
     static constexpr int TexSpecial   = 1;
     static constexpr int AbsentOffset = -1;
     //A face whose extents exceed this either errors in CalcSurfaceExtents or is TEX_SPECIAL, which has no lightmap.
-    static constexpr int MaxSurfaceExtent = 512;
+    static constexpr int MaxSurfaceExtent         = 512;
+    static constexpr int SvEngineMaxSurfaceExtent = 1024;
     //CalcSurfaceExtents' starting extremes, kept as its floats.
-    static constexpr float ExtentsInitialMin = 999999.0f;
-    static constexpr float ExtentsInitialMax = -99999.0f;
+    static constexpr float  ExtentsInitialMin    = 999999.0f;
+    static constexpr float  ExtentsInitialMax    = -99999.0f;
+    static constexpr double SvEngineExtentsBound = 2147483648.0;
     //Texture coordinates beyond this make floor(coordinate / 16) overflow int.
     static constexpr double MaxTextureCoordinate = 268435456.0;
     //Mod_SetParent, the hull traces and the light point recurse once per level; stock maps stay far below this.
@@ -345,8 +348,12 @@ private:
     //CalcSurfaceExtents, which keeps texturemins and extents as shorts.
     bool FaceExtents(size_t face, size_t texInfo, std::int16_t (&extents)[TextureAxes])
     {
-        float mins[TextureAxes] = {ExtentsInitialMin, ExtentsInitialMin};
-        float maxs[TextureAxes] = {ExtentsInitialMax, ExtentsInitialMax};
+        double mins[TextureAxes] = {
+            m_bIsSvEngine ? SvEngineExtentsBound : static_cast<double>(ExtentsInitialMin),
+            m_bIsSvEngine ? SvEngineExtentsBound : static_cast<double>(ExtentsInitialMin)};
+        double maxs[TextureAxes] = {
+            m_bIsSvEngine ? -SvEngineExtentsBound : static_cast<double>(ExtentsInitialMax),
+            m_bIsSvEngine ? -SvEngineExtentsBound : static_cast<double>(ExtentsInitialMax)};
 
         const auto firstEdge = ReadInt32(face + FaceFirstEdgeOffset);
         const auto edgeCount = ReadInt16(face + FaceEdgeCountOffset);
@@ -369,7 +376,7 @@ private:
                 if (!(std::fabs(value) <= MaxTextureCoordinate))
                     return Bad("texture coordinate out of range", Reason::InvalidFormat);
 
-                const auto coordinate = static_cast<float>(value);
+                const double coordinate = m_bIsSvEngine ? value : static_cast<double>(static_cast<float>(value));
                 if (coordinate < mins[axis])
                     mins[axis] = coordinate;
                 if (coordinate > maxs[axis])
@@ -413,10 +420,11 @@ private:
             if (!FaceExtents(face, texInfo, extents))
                 return false;
 
-            const bool bSpecial = (ReadInt32(texInfo + TexInfoFlagsOffset) & TexSpecial) != 0;
-            const bool bLarge   = extents[0] > MaxSurfaceExtent || extents[1] > MaxSurfaceExtent;
+            const int  maxExtent = m_bIsSvEngine ? SvEngineMaxSurfaceExtent : MaxSurfaceExtent;
+            const bool bSpecial  = (ReadInt32(texInfo + TexInfoFlagsOffset) & TexSpecial) != 0;
+            const bool bLarge    = extents[0] > maxExtent || extents[1] > maxExtent;
             if (!bSpecial && bLarge)
-                return Bad("surface extents exceed 512", Reason::InvalidFormat);
+                return Bad(m_bIsSvEngine ? "surface extents exceed 1024" : "surface extents exceed 512", Reason::InvalidFormat);
 
             const auto lightOffset = ReadInt32(face + FaceLightOffset);
             if (lightOffset == AbsentOffset)
@@ -759,6 +767,7 @@ private:
     size_t                              m_Size;
     Layout                              m_Layout;
     UtilAssetsIntegrityCheckResult_BSP* m_pResult;
+    bool                                m_bIsSvEngine{false};
     Reason                              m_Reason{Reason::OK};
     size_t                              m_Offsets[LumpCount]{};
     size_t                              m_Lengths[LumpCount]{};
