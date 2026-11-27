@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TextureAssetValidation.h"
+#include <UtilAssetsIntegrityBSPModel.h>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -488,6 +489,8 @@ private:
         for (size_t i = 0; i < Count(ModelLump, ModelBytes); ++i)
         {
             const auto model = Record(ModelLump, i, ModelBytes);
+            if (UtilAssetsIntegrity_IsBSPModelMarker(m_pData + model, i, Count(ModelLump, ModelBytes)))
+                continue;
             //Mins, maxs and origin.
             if (!Finite(model, Axes * 3))
                 return Bad("non-finite model bounds", Reason::InvalidFormat);
@@ -498,10 +501,16 @@ private:
                     return Bad("inverted model bounds", Reason::InvalidFormat);
             }
 
-            if (!Index(ReadInt32(model + ModelHeadNodeOffset), nodes))
+            //A faceless inline model may omit its drawing tree while other hulls still have collision.
+            constexpr int contentsEmpty    = -1;
+            const auto    headNode         = ReadInt32(model + ModelHeadNodeOffset);
+            const auto    visibleLeaves    = ReadInt32(model + ModelVisLeafsOffset);
+            const auto    faceCount        = ReadInt32(model + ModelFaceCountOffset);
+            const bool    emptyDrawingHull = i != 0 && headNode == contentsEmpty && !visibleLeaves && !faceCount;
+            if (!emptyDrawingHull && !Index(headNode, nodes))
                 return Bad("model head node out of range");
 
-            //A negative clipping head is the contents of an empty hull. Compilers also give a model without clipping
+            //A negative clipping head is a terminal contents value. Compilers also give a model without clipping
             //brushes the next model's first clipnode, which is the clipnode count after the last one with clipnodes:
             //stock maps (c2a2a, de_inferno_cz) have such models, which callers must not trace.
             for (int hull = 1; hull < Hulls; ++hull)
@@ -512,10 +521,10 @@ private:
             }
 
             //A model's visible leaves exclude leaf 0.
-            if (!Index(ReadInt32(model + ModelVisLeafsOffset), leaves))
+            if (!Index(visibleLeaves, leaves))
                 return Bad("model visible leaves out of range");
 
-            if (!Span(ReadInt32(model + ModelFirstFaceOffset), ReadInt32(model + ModelFaceCountOffset), faces))
+            if (!Span(ReadInt32(model + ModelFirstFaceOffset), faceCount, faces))
                 return Bad("model faces out of range");
         }
 

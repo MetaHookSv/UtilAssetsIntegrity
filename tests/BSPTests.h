@@ -475,6 +475,21 @@ void CheckBSPs(IUtilAssetsIntegrity& api)
     }
 
     //Models.
+    {
+        F        f;
+        F::Model marker{};
+        marker.origin[2] = 9999.0f;
+        marker.mins[0]   = std::numeric_limits<float>::quiet_NaN();
+        f.Append(F::Models, marker);
+        expect(Reason::OK, f, "BSP trailing marker with an opaque first word");
+        marker.headNodes[1] = -1;
+        f.Set(F::Models, marker, 1);
+        expect(Reason::InvalidFormat, f, "BSP actual model still requires finite bounds");
+        marker.headNodes[1] = 0;
+        f.Set(F::Models, marker, 1);
+        f.Append(F::Models, F::Model{});
+        expect(Reason::InvalidFormat, f, "BSP marker must be last");
+    }
     const auto model = [](F& f, void (*change)(F::Model&)) {
         auto value = f.Get<F::Model>(F::Models);
         change(value);
@@ -486,6 +501,25 @@ void CheckBSPs(IUtilAssetsIntegrity& api)
         expect(Reason::OutOfBound, f, "BSP model head node out of range");
         model(f, [](F::Model& value) { value.headNodes[0] = -1; });
         expect(Reason::OutOfBound, f, "BSP negative model head node");
+    }
+    {
+        F        f;
+        F::Model inlineModel{};
+        inlineModel.headNodes[0] = -1;
+        inlineModel.headNodes[2] = -2; // CONTENTS_SOLID
+        inlineModel.headNodes[3] = -3; // CONTENTS_WATER
+        f.Append(F::Models, inlineModel);
+        expect(Reason::OK, f, "BSP empty drawing hull with independent clipping heads");
+        inlineModel.faceCount = 1;
+        f.Set(F::Models, inlineModel, 1);
+        expect(Reason::OutOfBound, f, "BSP faces without a drawing tree");
+        inlineModel.faceCount = 0;
+        inlineModel.visLeaves = 1;
+        f.Set(F::Models, inlineModel, 1);
+        expect(Reason::OutOfBound, f, "BSP visible leaves without a drawing tree");
+        inlineModel.visLeaves = 0;
+        f.Set(F::Models, inlineModel);
+        expect(Reason::OutOfBound, f, "BSP world without a drawing tree");
     }
     {
         F f;

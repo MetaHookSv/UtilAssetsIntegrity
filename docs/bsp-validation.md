@@ -51,7 +51,12 @@ values are unsigned. Every range is checked without overflow.
   samples are its null lighting data plus the offset, so only offset 0 is accepted
   (the unlit `cz_worldmap.bsp` gives every face 0).
 - Mark surfaces reference faces.
-- Models reference their head node; a clipping hull's head is a clipnode, a negative
+- A non-world model with zero faces and zero visible leaves may have drawing head -1.
+  Some maps end their model lump with a marker whose only populated fields are the first
+  word and an origin.z of 9999. Callers can use `UtilAssetsIntegrity_IsBSPModelMarker`
+  to retain its slot with neutral bounds and avoid interpreting the first word as a float.
+  Surface queries on that hull have no node to visit. Other models reference a drawing node.
+  A clipping hull's head is a clipnode, a negative
   contents, or the clipnode count; visible leaves are below the leaf count; faces are in
   range. Compilers give a model without clipping brushes the next model's first
   clipnode, which after the last model with clipnodes is the count (stock `c2a2a.bsp`,
