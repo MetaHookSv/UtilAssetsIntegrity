@@ -141,8 +141,8 @@ inline Reason Sprite(const void* buffer, size_t size, UtilAssetsIntegrityCheckRe
         return Fail(result, "Invalid sprite bounds", Reason::InvalidFormat);
     const auto frames = header.frames;
     const auto colors = Read<uint16_t>(p + sizeof(header));
-    if (colors != PaletteColors)
-        return Fail(result, "Expected 256 sprite palette colors", Reason::InvalidFormat);
+    if (!colors || colors > PaletteColors)
+        return Fail(result, "Expected 1 to 256 sprite palette colors", Reason::InvalidFormat);
     size_t cursor = sizeof(header) + sizeof(colors) + colors * 3;
     if (cursor > size || size > INT_MAX || frames <= 0 || size_t(frames) > (size - cursor) / (4 + frameHeader + 1))
         return Fail(result, "Sprite palette or frames outside file");

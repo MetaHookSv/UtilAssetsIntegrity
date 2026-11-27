@@ -33,6 +33,16 @@ void CheckTextureAssets(IUtilAssetsIntegrity& api)
         check(method, bytes, false, label);
     };
     check(spr, sprite, true, "single sprite");
+    for (const std::uint16_t colors : {1, 2, 255})
+    {
+        auto compact = sprite;
+        compact.erase(compact.begin() + palette + colors * 3, compact.begin() + frameType);
+        SetAssetField(compact, 40, colors);
+        compact.back() = static_cast<std::uint8_t>(colors - 1);
+        check(spr, compact, true, "single sprite with compact palette");
+        compact.pop_back();
+        check(spr, compact, false, "truncated compact sprite");
+    }
     mutate(spr, sprite, 0, 0, "sprite signature");
     mutate(spr, sprite, 4, 3, "sprite version");
     mutate(spr, sprite, 8, 5, "sprite orientation");
@@ -43,7 +53,8 @@ void CheckTextureAssets(IUtilAssetsIntegrity& api)
     mutate(spr, sprite, 28, INT_MAX, "sprite frame count");
     mutate(spr, sprite, 32, std::numeric_limits<float>::infinity(), "sprite beam length");
     mutate(spr, sprite, 36, 2, "sprite sync type");
-    mutate(spr, sprite, 40, std::uint16_t{255}, "sprite palette count");
+    mutate(spr, sprite, 40, std::uint16_t{0}, "empty sprite palette");
+    mutate(spr, sprite, 40, std::uint16_t{257}, "oversize sprite palette");
     mutate(spr, sprite, frameType, 2, "sprite frame type");
     mutate(spr, sprite, frameType + 4, INT_MAX, "sprite right edge overflow");
     mutate(spr, sprite, frameType + 8, INT_MIN, "sprite bottom edge overflow");
